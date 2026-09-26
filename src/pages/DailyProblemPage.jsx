@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Zap, Star, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Trophy, Zap, Star, CheckCircle2, RotateCcw, ExternalLink } from 'lucide-react';
 import useStore from '../store/useStore.js';
 import { DAILY_PROBLEMS } from '../lib/data.js';
 import { getDailyProblem } from '../lib/storage.js';
@@ -190,7 +190,7 @@ export default function DailyProblemPage() {
       </div>
 
       {tab === 'problem' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="daily-problem-grid">
           {/* Problem statement */}
           <div className="problem-card">
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
@@ -209,6 +209,32 @@ export default function DailyProblemPage() {
             <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 6, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: 'var(--warning)' }}>
               💡 Hint: {todayProblem.hint}
             </div>
+
+            {/* GeeksforGeeks Related Practice Problem */}
+            {todayProblem.gfgPractice && (
+              <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(47,141,70,0.08)', border: '1px solid rgba(47,141,70,0.25)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 200, flex: 1 }}>
+                  <span style={{ fontSize: 14 }}>🟢</span>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
+                      {todayProblem.gfgPractice.title}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      Practice related challenges & variations on GeeksforGeeks
+                    </div>
+                  </div>
+                </div>
+                <a
+                  href={todayProblem.gfgPractice.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                  style={{ borderColor: '#2F8D46', color: '#2F8D46', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
+                >
+                  Practice on GFG <ExternalLink size={12} />
+                </a>
+              </div>
+            )}
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

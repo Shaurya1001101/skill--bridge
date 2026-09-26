@@ -6,6 +6,7 @@ export default function SettingsPage() {
   const user = useStore(s => s.user);
   const setUser = useStore(s => s.setUser);
   const theme = useStore(s => s.theme);
+  const setTheme = useStore(s => s.setTheme);
   const toggleTheme = useStore(s => s.toggleTheme);
   const planDuration = useStore(s => s.planDuration);
   const setPlanDuration = useStore(s => s.setPlanDuration);
@@ -99,14 +100,17 @@ export default function SettingsPage() {
           <div className="form-group">
             <label className="form-label">Color Theme</label>
             <div style={{ display: 'flex', gap: 10 }}>
-              {['dark', 'light'].map(t => (
+              {['light', 'dark'].map(t => (
                 <button
                   key={t}
                   id={`theme-${t}`}
                   className={`btn ${theme === t ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => theme !== t && toggleTheme()}
+                  onClick={() => {
+                    setTheme(t);
+                    addToast(`Theme switched to ${t === 'light' ? 'Light' : 'Dark'} mode`, 'info');
+                  }}
                 >
-                  {t === 'dark' ? '🌙 Dark' : '☀️ Light'}
+                  {t === 'light' ? '☀️ Light' : '🌙 Dark'}
                 </button>
               ))}
             </div>

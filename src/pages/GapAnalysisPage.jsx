@@ -116,7 +116,7 @@ export default function GapAnalysisPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="responsive-two-col-grid">
         {/* Left: Profile Input */}
         <div>
           <div className="card" style={{ marginBottom: 16 }}>

@@ -161,6 +161,21 @@ export const VIDEO_LIBRARY = [
   { id: 'v10', title: 'MIT 6.006: Introduction to Algorithms', channel: 'MIT OpenCourseWare', duration: '35h', category: 'python', tags: ['Algorithms', 'Data Structures', 'CS'], url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/', thumbnail: '#6D28D9', desc: 'MIT\'s comprehensive algorithms course with full lecture videos and problem sets.' },
   { id: 'v11', title: 'Fast.ai: Practical Deep Learning', channel: 'fast.ai', duration: '20h', category: 'ml', tags: ['Deep Learning', 'PyTorch', 'NLP'], url: 'https://fast.ai', thumbnail: '#EA580C', desc: 'Top-down practical approach to deep learning, covering NLP, vision, and tabular.' },
   { id: 'v12', title: 'freeCodeCamp: Relational Databases', channel: 'freeCodeCamp', duration: '300h cert', category: 'sql', tags: ['SQL', 'PostgreSQL', 'Bash'], url: 'https://www.freecodecamp.org/learn/relational-database/', thumbnail: '#0891B2', desc: '300-hour interactive relational database certification covering SQL and PostgreSQL.' },
+
+  // GeeksforGeeks Curated Learning Hub Collection
+  { id: 'gfg-dsa-1', title: 'GeeksforGeeks: Complete DSA Roadmap & Mastery Guide', channel: 'GeeksforGeeks', duration: 'Curated Guide', category: 'dsa', tags: ['DSA', 'Arrays', 'Trees', 'Graphs'], url: 'https://www.geeksforgeeks.org/complete-guide-to-dsa-for-beginners/', thumbnail: '#2F8D46', desc: 'Step-by-step roadmap covering foundational arrays, linked lists, trees, graphs, and dynamic programming algorithms.' },
+  { id: 'gfg-dsa-2', title: 'GeeksforGeeks: Top 50 Array & Two-Pointer Coding Problems', channel: 'GeeksforGeeks', duration: 'Practice Hub', category: 'dsa', tags: ['DSA', 'Arrays', 'Two Pointers'], url: 'https://www.geeksforgeeks.org/top-50-array-coding-problems-for-interviews/', thumbnail: '#2F8D46', desc: 'Curated collection of interview-tested array and two-pointer challenges with detailed complexity analyses.' },
+  { id: 'gfg-dsa-3', title: 'GeeksforGeeks: Dynamic Programming (DP) Tutorial with Problems', channel: 'GeeksforGeeks', duration: 'Self-paced', category: 'dsa', tags: ['DSA', 'Dynamic Programming', 'Memoization'], url: 'https://www.geeksforgeeks.org/dynamic-programming/', thumbnail: '#2F8D46', desc: 'Master overlapping subproblems, memoization vs tabulation, knapsack, and longest common subsequence patterns.' },
+  { id: 'gfg-dsa-4', title: 'GeeksforGeeks: Binary Search Trees & Graph Algorithms (BFS/DFS)', channel: 'GeeksforGeeks', duration: 'Interactive', category: 'dsa', tags: ['DSA', 'BST', 'BFS', 'DFS'], url: 'https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/', thumbnail: '#2F8D46', desc: 'In-depth algorithms for traversals, Dijkstra shortest path, topological sorting, and cycle detection.' },
+  { id: 'gfg-py-1', title: 'GeeksforGeeks: Python Programming Foundation & Advanced OOP', channel: 'GeeksforGeeks', duration: 'Tutorial Series', category: 'python', tags: ['Python', 'OOP', 'Generators', 'Data Structures'], url: 'https://www.geeksforgeeks.org/python-programming-language/', thumbnail: '#2F8D46', desc: 'Complete Python syntax, decorators, generators, multi-threading, and object-oriented architectural patterns.' },
+  { id: 'gfg-py-2', title: 'GeeksforGeeks: NumPy & Pandas for Data Science Bootcamp', channel: 'GeeksforGeeks', duration: 'Hands-on Guide', category: 'python', tags: ['Python', 'NumPy', 'Pandas', 'Data Analysis'], url: 'https://www.geeksforgeeks.org/numpy-tutorial/', thumbnail: '#2F8D46', desc: 'Vectorized arrays, broadcasting, data manipulation with Pandas DataFrames, and performance profiling.' },
+  { id: 'gfg-sql-1', title: 'GeeksforGeeks: SQL Querying, Subqueries & Window Functions', channel: 'GeeksforGeeks', duration: 'Practice Hub', category: 'sql', tags: ['SQL', 'Window Functions', 'JOINs', 'Indexing'], url: 'https://www.geeksforgeeks.org/sql-tutorial/', thumbnail: '#2F8D46', desc: 'Master complex aggregations, recursive CTEs, window functions (ROW_NUMBER, RANK, LEAD/LAG), and B-Tree indexing.' },
+  { id: 'gfg-sql-2', title: 'GeeksforGeeks: Database Management Systems (DBMS) Fundamentals', channel: 'GeeksforGeeks', duration: 'Course Notes', category: 'sql', tags: ['SQL', 'DBMS', 'ACID', 'Normalization'], url: 'https://www.geeksforgeeks.org/dbms/', thumbnail: '#2F8D46', desc: 'ACID properties, transactions, isolation levels, database normalization (1NF–BCNF), and concurrency control.' },
+  { id: 'gfg-devops-1', title: 'GeeksforGeeks: Docker & Containerization Architecture', channel: 'GeeksforGeeks', duration: 'Tutorial', category: 'devops', tags: ['Docker', 'DevOps', 'Containers', 'CI/CD'], url: 'https://www.geeksforgeeks.org/docker-tutorial/', thumbnail: '#2F8D46', desc: 'Building multi-stage Dockerfiles, image optimization, volume management, and container networking.' },
+  { id: 'gfg-devops-2', title: 'GeeksforGeeks: Kubernetes Architecture, Pods & Services Guide', channel: 'GeeksforGeeks', duration: 'Architecture Guide', category: 'devops', tags: ['Kubernetes', 'K8s', 'Cloud', 'DevOps'], url: 'https://www.geeksforgeeks.org/kubernetes/', thumbnail: '#2F8D46', desc: 'Cluster architecture, Deployments, ReplicaSets, Ingress controllers, and Horizontal Pod Autoscaling (HPA).' },
+  { id: 'gfg-math-1', title: 'GeeksforGeeks: Mathematics & Statistics for Machine Learning', channel: 'GeeksforGeeks', duration: 'Tutorial', category: 'math', tags: ['Math', 'Linear Algebra', 'Calculus', 'Probability'], url: 'https://www.geeksforgeeks.org/maths-for-machine-learning/', thumbnail: '#2F8D46', desc: 'Matrix decompositions (SVD, Eigenvalues), gradient descent calculus, and Bayesian probability distributions.' },
+  { id: 'gfg-ml-1', title: 'GeeksforGeeks: Machine Learning Algorithms from Scratch', channel: 'GeeksforGeeks', duration: 'In-Depth Guide', category: 'ml', tags: ['ML', 'Algorithms', 'Scikit-learn', 'Regression'], url: 'https://www.geeksforgeeks.org/machine-learning/', thumbnail: '#2F8D46', desc: 'Mathematical derivations and Python implementations for Linear/Logistic Regression, Decision Trees, and Random Forests.' },
+  { id: 'gfg-ml-2', title: 'GeeksforGeeks: Deep Learning & Neural Networks Architecture', channel: 'GeeksforGeeks', duration: 'Course Notes', category: 'ml', tags: ['Deep Learning', 'PyTorch', 'Neural Networks', 'CNN'], url: 'https://www.geeksforgeeks.org/deep-learning-tutorial/', thumbnail: '#2F8D46', desc: 'Backpropagation calculus, Convolutional Neural Networks (CNNs), Recurrent Neural Networks (RNNs), and Attention Mechanisms.' },
 ];
 
 export const MARKET_JOBS = [
@@ -316,6 +331,7 @@ export const DAILY_PROBLEMS = [
     starterCode: 'import numpy as np\n\ndef sigmoid(x):\n    # Your implementation here\n    pass\n\nvalues = [-2, -1, 0, 1, 2]\nprint(sigmoid(np.array(values)))',
     solution: 'import numpy as np\n\ndef sigmoid(x):\n    return 1 / (1 + np.exp(-x))\n\nvalues = [-2, -1, 0, 1, 2]\nprint(sigmoid(np.array(values)))\n# Output: [0.119 0.269 0.5 0.731 0.881]',
     tags: ['NumPy', 'Activation', 'Math'],
+    gfgPractice: { title: 'GeeksforGeeks: Mathematical Functions in Python', url: 'https://www.geeksforgeeks.org/mathematical-functions-python-set-1-numeric-functions/' },
   },
   {
     id: 'p2', title: 'Top 5 Highest Salary Roles', difficulty: 'easy', category: 'SQL',
@@ -324,6 +340,7 @@ export const DAILY_PROBLEMS = [
     starterCode: '-- Table: jobs (id, role, salary, company, location)\nSELECT \n    role,\n    -- Your code here\nFROM jobs\n-- Complete the query\nLIMIT 5;',
     solution: 'SELECT \n    role,\n    ROUND(AVG(salary), 2) AS avg_salary\nFROM jobs\nGROUP BY role\nORDER BY avg_salary DESC\nLIMIT 5;',
     tags: ['GROUP BY', 'AVG', 'ORDER BY'],
+    gfgPractice: { title: 'GeeksforGeeks: SQL Query to find Second and Nth Highest Salary', url: 'https://www.geeksforgeeks.org/sql-query-to-find-second-largest-salary/' },
   },
   {
     id: 'p3', title: 'Train/Test Split from Scratch', difficulty: 'medium', category: 'Python/ML',
@@ -332,6 +349,7 @@ export const DAILY_PROBLEMS = [
     starterCode: 'import numpy as np\n\ndef train_test_split(X, y, test_size=0.2, random_state=42):\n    # Your implementation here\n    pass\n\nX = np.array([[1,2],[3,4],[5,6],[7,8],[9,10]])\ny = np.array([0, 1, 0, 1, 0])\nX_train, X_test, y_train, y_test = train_test_split(X, y)\nprint(f"Train size: {len(X_train)}, Test size: {len(X_test)}")',
     solution: 'import numpy as np\n\ndef train_test_split(X, y, test_size=0.2, random_state=42):\n    np.random.seed(random_state)\n    indices = np.random.permutation(len(X))\n    split = int(len(X) * (1 - test_size))\n    train_idx, test_idx = indices[:split], indices[split:]\n    return X[train_idx], X[test_idx], y[train_idx], y[test_idx]\n\nX = np.array([[1,2],[3,4],[5,6],[7,8],[9,10]])\ny = np.array([0, 1, 0, 1, 0])\nX_train, X_test, y_train, y_test = train_test_split(X, y)\nprint(f"Train size: {len(X_train)}, Test size: {len(X_test)}")',
     tags: ['NumPy', 'Preprocessing', 'ML'],
+    gfgPractice: { title: 'GeeksforGeeks: Splitting Data for Machine Learning Models', url: 'https://www.geeksforgeeks.org/splitting-data-for-machine-learning-models/' },
   },
   {
     id: 'p4', title: 'Compute Precision & Recall', difficulty: 'medium', category: 'Python/ML',
@@ -340,6 +358,7 @@ export const DAILY_PROBLEMS = [
     starterCode: 'def precision_recall(y_true, y_pred):\n    # Your implementation here\n    pass\n\ny_true = [1, 0, 1, 1, 0, 1]\ny_pred = [1, 0, 1, 0, 1, 1]\np, r = precision_recall(y_true, y_pred)\nprint(f"Precision: {p:.3f}, Recall: {r:.3f}")',
     solution: 'def precision_recall(y_true, y_pred):\n    tp = sum(1 for t,p in zip(y_true,y_pred) if t==1 and p==1)\n    fp = sum(1 for t,p in zip(y_true,y_pred) if t==0 and p==1)\n    fn = sum(1 for t,p in zip(y_true,y_pred) if t==1 and p==0)\n    precision = tp / (tp + fp) if (tp + fp) > 0 else 0\n    recall = tp / (tp + fn) if (tp + fn) > 0 else 0\n    return precision, recall\n\ny_true = [1, 0, 1, 1, 0, 1]\ny_pred = [1, 0, 1, 0, 1, 1]\np, r = precision_recall(y_true, y_pred)\nprint(f"Precision: {p:.3f}, Recall: {r:.3f}")',
     tags: ['Metrics', 'Classification', 'ML'],
+    gfgPractice: { title: 'GeeksforGeeks: Precision and Recall in Machine Learning', url: 'https://www.geeksforgeeks.org/precision-and-recall-in-machine-learning/' },
   },
   {
     id: 'p5', title: 'Find Skill Co-occurrence', difficulty: 'hard', category: 'SQL',
@@ -348,6 +367,7 @@ export const DAILY_PROBLEMS = [
     starterCode: '-- Table: job_skills (job_id, skill)\n-- Find top 5 co-occurring skill pairs\nSELECT\n    -- Your code here\nFROM job_skills a\nJOIN job_skills b ON -- join condition\nWHERE -- avoid duplicates\nGROUP BY a.skill, b.skill\nORDER BY count DESC\nLIMIT 5;',
     solution: 'SELECT\n    a.skill AS skill_1,\n    b.skill AS skill_2,\n    COUNT(*) AS co_occurrence\nFROM job_skills a\nJOIN job_skills b ON a.job_id = b.job_id\nWHERE a.skill < b.skill\nGROUP BY a.skill, b.skill\nORDER BY co_occurrence DESC\nLIMIT 5;',
     tags: ['Self-Join', 'Aggregation', 'Advanced'],
+    gfgPractice: { title: 'GeeksforGeeks: SQL Self Join with Real-World Queries', url: 'https://www.geeksforgeeks.org/sql-self-join/' },
   },
   {
     id: 'p6', title: 'K-Nearest Neighbors Classifier', difficulty: 'hard', category: 'Python/ML',
@@ -356,6 +376,7 @@ export const DAILY_PROBLEMS = [
     starterCode: 'import numpy as np\nfrom collections import Counter\n\nclass KNN:\n    def __init__(self, k=3):\n        self.k = k\n    \n    def fit(self, X, y):\n        # Store training data\n        pass\n    \n    def predict(self, X):\n        # Return predictions\n        pass\n\n# Test it\nX_train = np.array([[1,1],[2,2],[3,1],[6,6],[7,7],[8,6]])\ny_train = np.array([0,0,0,1,1,1])\nX_test = np.array([[2,1],[7,6]])\nknn = KNN(k=3)\nknn.fit(X_train, y_train)\nprint(knn.predict(X_test))  # Expected: [0, 1]',
     solution: 'import numpy as np\nfrom collections import Counter\n\nclass KNN:\n    def __init__(self, k=3):\n        self.k = k\n    \n    def fit(self, X, y):\n        self.X_train = X\n        self.y_train = y\n    \n    def predict(self, X):\n        return np.array([self._predict_single(x) for x in X])\n    \n    def _predict_single(self, x):\n        dists = np.sqrt(np.sum((self.X_train - x)**2, axis=1))\n        k_idx = np.argsort(dists)[:self.k]\n        k_labels = self.y_train[k_idx]\n        return Counter(k_labels).most_common(1)[0][0]\n\nX_train = np.array([[1,1],[2,2],[3,1],[6,6],[7,7],[8,6]])\ny_train = np.array([0,0,0,1,1,1])\nX_test = np.array([[2,1],[7,6]])\nknn = KNN(k=3)\nknn.fit(X_train, y_train)\nprint(knn.predict(X_test))  # [0, 1]',
     tags: ['Algorithm', 'Distance', 'Classification'],
+    gfgPractice: { title: 'GeeksforGeeks: K-Nearest Neighbours Algorithm & Implementation', url: 'https://www.geeksforgeeks.org/k-nearest-neighbours/' },
   },
   {
     id: 'p7', title: 'Gradient Descent Step', difficulty: 'medium', category: 'Python/ML',
@@ -364,6 +385,7 @@ export const DAILY_PROBLEMS = [
     starterCode: 'import numpy as np\n\ndef gradient_descent_step(w, X, y, lr=0.01):\n    # Compute one gradient descent step for linear regression\n    pass\n\nX = np.array([[1,1],[1,2],[1,3]])\ny = np.array([2, 3, 4])\nw = np.zeros(2)\nw_new = gradient_descent_step(w, X, y, lr=0.01)\nprint(w_new)',
     solution: 'import numpy as np\n\ndef gradient_descent_step(w, X, y, lr=0.01):\n    n = len(y)\n    predictions = X @ w\n    errors = y - predictions\n    gradient = -(2/n) * X.T @ errors\n    return w - lr * gradient\n\nX = np.array([[1,1],[1,2],[1,3]])\ny = np.array([2, 3, 4])\nw = np.zeros(2)\nw_new = gradient_descent_step(w, X, y, lr=0.01)\nprint(w_new)',
     tags: ['Optimization', 'Linear Algebra', 'Math'],
+    gfgPractice: { title: 'GeeksforGeeks: Gradient Descent in Python from Scratch', url: 'https://www.geeksforgeeks.org/gradient-descent-in-python/' },
   },
 ];
 

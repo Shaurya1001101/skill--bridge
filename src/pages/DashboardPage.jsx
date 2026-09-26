@@ -8,8 +8,10 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 import useStore from '../store/useStore.js';
-import { HEATMAP_DATA, PEER_PROFILES, TREND_DATA, STATIC_NEWS_FALLBACK, VIDEO_LIBRARY, SKILL_ROLES } from '../lib/data.js';
+import { PEER_PROFILES, TREND_DATA, STATIC_NEWS_FALLBACK, VIDEO_LIBRARY, SKILL_ROLES } from '../lib/data.js';
 import { computeReadiness, rankVideosForGaps } from '../lib/storage.js';
+import { apiUrl } from '../lib/api.js';
+import CuratedLearningAndNewsFeed from '../components/ui/CuratedLearningAndNewsFeed.jsx';
 
 // ─── Animated KPI Card ────────────────────────────────────────────────────────
 function KPICard({ value, suffix, label, trend, trendUp, colorClass }) {
@@ -38,22 +40,6 @@ function KPICard({ value, suffix, label, trend, trendUp, colorClass }) {
   );
 }
 
-// ─── Heatmap ─────────────────────────────────────────────────────────────────
-function SkillHeatmap() {
-  const catClass = { critical: 'heat-critical', high: 'heat-high', medium: 'heat-medium', low: 'heat-low', ok: 'heat-ok' };
-  const catLabel = { critical: 'Critical', high: 'High Gap', medium: 'Medium', low: 'Low Gap', ok: 'Met' };
-  return (
-    <div className="skill-heatmap">
-      {HEATMAP_DATA.map(d => (
-        <div key={d.name} className={`heat-cell ${catClass[d.cat]}`} title={`${d.name}: ${d.pct}% coverage`}>
-          <div className="heat-cell-name">{d.name}</div>
-          <div className="heat-cell-val">{d.pct}%</div>
-          <div className="heat-cell-sub">{catLabel[d.cat]}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 // ─── News Panel ───────────────────────────────────────────────────────────────
 function NewsPanel() {
@@ -70,7 +56,7 @@ function NewsPanel() {
       } catch {}
     }
     setLoading(true);
-    fetch('/api/news')
+    fetch(apiUrl('/api/news'))
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.items?.length) {
@@ -168,7 +154,7 @@ function RecommendedVideos({ gapSkills }) {
   const ranked = rankVideosForGaps(VIDEO_LIBRARY, gapSkills).slice(0, 3);
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+    <div className="recommended-videos-grid">
       {ranked.map(v => (
         <div key={v.id} className="card" style={{ padding: 12, cursor: 'pointer' }} onClick={() => window.open(v.url, '_blank')}>
           <div style={{ height: 60, borderRadius: 6, background: v.thumbnail, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 8, fontFamily: 'Outfit' }}>
@@ -290,7 +276,7 @@ export default function DashboardPage() {
       </div>
 
       {/* XP / Streak Row */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div className="dashboard-stats-row">
         <div className="card" style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
           <Trophy size={22} color="var(--warning)" />
           <div>
@@ -320,21 +306,8 @@ export default function DashboardPage() {
 
       {/* Main dashboard grid */}
       <div className="dashboard-grid" style={{ marginBottom: 20 }}>
-        {/* Skill Heatmap (wide) */}
-        <div className="card" style={{ gridColumn: '1 / -1' }}>
-          <div className="card-header">
-            <h2 className="card-title">Organizational Skill Heatmap</h2>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 10 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 2, background: '#F87171', display: 'inline-block' }} /> Critical
-                <span style={{ width: 8, height: 8, borderRadius: 2, background: '#FCD34D', display: 'inline-block' }} /> High
-                <span style={{ width: 8, height: 8, borderRadius: 2, background: '#93C5FD', display: 'inline-block' }} /> Medium
-                <span style={{ width: 8, height: 8, borderRadius: 2, background: '#34D399', display: 'inline-block' }} /> Met
-              </div>
-            </div>
-          </div>
-          <SkillHeatmap />
-        </div>
+        {/* Curated YouTube Learning Masterclasses & Tech News with Image Support */}
+        <CuratedLearningAndNewsFeed />
 
         {/* Top Critical Gaps */}
         <div className="card">
@@ -393,7 +366,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Daily News + Recommended Videos */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 20 }}>
+      <div className="dashboard-bottom-grid">
         <div className="card">
           <div className="card-header">
             <h2 className="card-title"><Newspaper size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />Daily Skill News</h2>

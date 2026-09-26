@@ -159,7 +159,7 @@ export default function TrajectoryPage() {
       </div>
 
       {/* Config Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="trajectory-config-grid">
         {/* Resume Upload */}
         <div className="card">
           <div className="card-header">
@@ -272,7 +272,7 @@ export default function TrajectoryPage() {
       {simData && (
         <>
           {/* Metric Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+          <div className="trajectory-metrics-grid">
             {[
               { pace: 'Conservative', hrs: '10h/wk', color: '#94A3B8', data: simData.conservData },
               { pace: 'Balanced (Recommended)', hrs: '18h/wk', color: '#3B82F6', data: simData.balancedData },

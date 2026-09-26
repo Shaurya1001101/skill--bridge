@@ -3,7 +3,8 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Brain, BarChart2, TrendingUp, Map, Code2,
   PlayCircle, Briefcase, Zap, HelpCircle, Search, Bell,
-  Sun, Moon, ShieldCheck, Trophy, Sparkles, ChevronDown, Settings, LogOut
+  Sun, Moon, ShieldCheck, Trophy, Sparkles, ChevronDown, Settings, LogOut,
+  Menu, X
 } from 'lucide-react';
 import useStore from '../../store/useStore.js';
 
@@ -42,11 +43,12 @@ export default function TopNavbar() {
   const [search, setSearch] = useState('');
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const notifRef = useRef(null);
   const profileRef = useRef(null);
   const tabsContainerRef = useRef(null);
 
-  // Close dropdowns on outside click
+  // Close menus on outside click
   useEffect(() => {
     const handler = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotif(false);
@@ -55,6 +57,13 @@ export default function TopNavbar() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Close mobile drawer on route navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setShowNotif(false);
+    setShowProfile(false);
+  }, [location.pathname]);
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && search.trim()) {
@@ -71,6 +80,7 @@ export default function TopNavbar() {
       else if (term.includes('help') || term.includes('faq')) navigate('/help');
       else navigate('/');
       setSearch('');
+      setMobileMenuOpen(false);
     }
   };
 
@@ -82,9 +92,9 @@ export default function TopNavbar() {
         <div className="top-brand-area" onClick={() => navigate('/')}>
           <div className="top-brand-logo">
             <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-              <path d="M4 14C4 8.5 8.5 4 14 4C19.5 4 24 8.5 24 14" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              <path d="M8 18C8 15.2 10.7 13 14 13C17.3 13 20 15.2 20 18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              <circle cx="14" cy="21" r="2.5" fill="white"/>
+              <path d="M4 14C4 8.5 8.5 4 14 4C19.5 4 24 8.5 24 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M8 18C8 15.2 10.7 13 14 13C17.3 13 20 15.2 20 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+              <circle cx="14" cy="21" r="2.5" fill="currentColor"/>
             </svg>
           </div>
           <div className="top-brand-info">
@@ -93,6 +103,7 @@ export default function TopNavbar() {
           </div>
 
           <button
+            type="button"
             className="market-live-pill"
             onClick={(e) => { e.stopPropagation(); navigate('/jobs'); }}
             title="Live hiring market trends"
@@ -102,8 +113,8 @@ export default function TopNavbar() {
           </button>
         </div>
 
-        {/* Global Search Bar */}
-        <div className="top-search-wrapper">
+        {/* Global Search Bar (Desktop) */}
+        <div className="top-search-wrapper desktop-only">
           <Search size={14} className="top-search-icon" />
           <input
             id="global-search"
@@ -125,10 +136,10 @@ export default function TopNavbar() {
             <span className="xp-indicator">{xp} XP</span>
           </div>
 
-          {/* 90% View Safety Scale Toggle */}
+          {/* 90% View Safety Scale Toggle (Desktop) */}
           <button
             type="button"
-            className={`scale-safety-pill ${safetyScale ? 'active' : ''}`}
+            className={`scale-safety-pill desktop-only ${safetyScale ? 'active' : ''}`}
             onClick={toggleSafetyScale}
             title={safetyScale ? '90% View Safety active (ensures no clipping). Click for 100%.' : '100% Scale. Click for 90% View Safety mode.'}
           >
@@ -147,8 +158,8 @@ export default function TopNavbar() {
             {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
           </button>
 
-          {/* Notifications Dropdown */}
-          <div style={{ position: 'relative' }} ref={notifRef}>
+          {/* Notifications Dropdown (Desktop) */}
+          <div style={{ position: 'relative' }} ref={notifRef} className="desktop-only">
             <button
               type="button"
               className="top-icon-btn"
@@ -172,8 +183,8 @@ export default function TopNavbar() {
             )}
           </div>
 
-          {/* User Profile & Settings Dropdown */}
-          <div style={{ position: 'relative' }} ref={profileRef}>
+          {/* User Profile Dropdown (Desktop) */}
+          <div style={{ position: 'relative' }} ref={profileRef} className="desktop-only">
             <button
               type="button"
               className="user-profile-btn"
@@ -213,10 +224,20 @@ export default function TopNavbar() {
               </div>
             )}
           </div>
+
+          {/* Mobile Hamburger Toggle */}
+          <button
+            type="button"
+            className="mobile-hamburger-btn mobile-only"
+            onClick={() => setMobileMenuOpen(v => !v)}
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
 
-      {/* ─── Row 2: Sticky Action Feature Navigation Tabs Bar ────────────── */}
+      {/* ─── Row 2: Action Feature Navigation Tabs Bar ────────────── */}
       <nav className="top-feature-tabs-bar" aria-label="Feature navigation" ref={tabsContainerRef}>
         <div className="top-feature-tabs-scroll">
           {FEATURE_TABS.map(tab => (
@@ -233,6 +254,88 @@ export default function TopNavbar() {
           ))}
         </div>
       </nav>
+
+      {/* ─── Mobile Slide-Out Navigation Drawer ─────────────────────────── */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-drawer">
+          {/* Mobile Search */}
+          <div className="mobile-drawer-search">
+            <Search size={14} style={{ color: 'var(--text-subtle)', marginLeft: 10 }} />
+            <input
+              type="text"
+              className="top-search-input"
+              placeholder="Search platform (Enter to go)..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={handleSearch}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* User Status Bar */}
+          <div className="mobile-drawer-user">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="user-avatar-sm">
+                {(user?.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+                  {user?.name || 'User'}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {user?.email || 'user@skillbridge.io'}
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={toggleTheme}
+              style={{ fontSize: 11 }}
+            >
+              {theme === 'dark' ? <><Sun size={12} /> Light</> : <><Moon size={12} /> Dark</>}
+            </button>
+          </div>
+
+          {/* Navigation Links with generous 44px+ touch targets */}
+          <div className="mobile-drawer-links">
+            {FEATURE_TABS.map(tab => (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                end={tab.end}
+                className={({ isActive }) => `mobile-drawer-item ${isActive ? 'active' : ''}`}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <tab.icon size={18} />
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>{tab.label}</span>
+                </div>
+                {tab.badge && <span className="feature-tab-badge">{tab.badge}</span>}
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Secondary Actions */}
+          <div className="mobile-drawer-footer">
+            <button
+              type="button"
+              className="mobile-drawer-footer-btn"
+              onClick={() => { navigate('/settings'); setMobileMenuOpen(false); }}
+            >
+              <Settings size={15} />
+              <span>Settings</span>
+            </button>
+            <button
+              type="button"
+              className="mobile-drawer-footer-btn danger"
+              onClick={() => { logout(); navigate('/login'); setMobileMenuOpen(false); }}
+            >
+              <LogOut size={15} />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

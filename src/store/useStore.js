@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import storage, { getDefaultCommittedPath, generatePathSchedule } from '../lib/storage.js';
+import { apiUrl } from '../lib/api.js';
 
 const useStore = create((set, get) => ({
   // ─── Safety Scale (100% default scale, optional 90% view toggle) ────────
@@ -102,7 +103,7 @@ const useStore = create((set, get) => ({
     const user = get().user;
     if (!user?.id) return;
     try {
-      await fetch('/api/profile', {
+      await fetch(apiUrl('/api/profile'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,13 +122,20 @@ const useStore = create((set, get) => ({
     }
   },
 
-  // ─── Theme ──────────────────────────────────────────────────────────────
+  // ─── Theme (Dark mode is default on site visit) ────────────────────────
   theme: storage.get('theme', 'dark'),
   toggleTheme: () => {
     const next = get().theme === 'dark' ? 'light' : 'dark';
     storage.set('theme', next);
     set({ theme: next });
-    document.documentElement.classList.toggle('light', next === 'light');
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(next);
+  },
+  setTheme: (next) => {
+    storage.set('theme', next);
+    set({ theme: next });
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(next);
   },
 
   // ─── Committed Path & Gamified Schedule ─────────────────────────────────
@@ -147,7 +155,7 @@ const useStore = create((set, get) => ({
     const user = get().user;
     if (user?.id) {
       try {
-        await fetch('/api/path', {
+        await fetch(apiUrl('/api/path'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -184,7 +192,7 @@ const useStore = create((set, get) => ({
     const user = get().user;
     if (user?.id) {
       try {
-        await fetch('/api/path', {
+        await fetch(apiUrl('/api/path'), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -331,6 +339,21 @@ const useStore = create((set, get) => ({
     }, 3800);
   },
   removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+
+  // ─── AI Assistant Career Chat ──────────────────────────────────────────
+  chatOpen: false,
+  toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
+  setChatOpen: (open) => set({ chatOpen: Boolean(open) }),
+  chatMessages: storage.get('chatMessages', []),
+  addChatMessage: (msg) => {
+    const next = [...get().chatMessages, msg];
+    storage.set('chatMessages', next.slice(-40));
+    set({ chatMessages: next });
+  },
+  clearChat: () => {
+    storage.remove('chatMessages');
+    set({ chatMessages: [] });
+  },
 }));
 
 export default useStore;

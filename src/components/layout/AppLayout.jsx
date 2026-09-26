@@ -3,7 +3,7 @@ import useStore from '../../store/useStore.js';
 import TopNavbar from './TopNavbar.jsx';
 import BottomRightDock from './BottomRightDock.jsx';
 import ToastContainer from '../ui/ToastContainer.jsx';
-import { AIAssistant } from '../../pages/HelpPage.jsx';
+import AIAssistant from '../ui/AIAssistant.jsx';
 
 export default function AppLayout() {
   const safetyScale = useStore(s => s.safetyScale);

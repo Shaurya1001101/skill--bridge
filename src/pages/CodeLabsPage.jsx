@@ -4,6 +4,7 @@ import useStore from '../store/useStore.js';
 import { LATEX_TEMPLATES } from '../lib/data.js';
 
 import { executePython, loadSkulpt } from '../lib/pythonRunner.js';
+import CloudOnlineCompiler from '../components/ui/CloudOnlineCompiler.jsx';
 
 
 // ─── Python Lab ───────────────────────────────────────────────────────────────
@@ -114,7 +115,7 @@ function PythonLab() {
           </button>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+      <div className="lab-split-pane">
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="lab-toolbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -134,18 +135,18 @@ function PythonLab() {
           </div>
           <textarea
             className="lab-editor-area"
-            style={{ flex: 1, minHeight: 320 }}
+            style={{ flex: 1, minHeight: 300 }}
             value={code}
             onChange={e => setCode(e.target.value)}
             spellCheck={false}
             placeholder="Write Python code here..."
           />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', borderLeft: '1px solid var(--border)' }}>
+        <div className="lab-output-pane">
           <div className="lab-toolbar">
-            <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Output</span>
+            <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Output Console</span>
           </div>
-          <div className="lab-terminal" style={{ flex: 1, minHeight: 320 }}>{output}</div>
+          <div className="lab-terminal" style={{ flex: 1, minHeight: 300 }}>{output}</div>
         </div>
       </div>
       <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 8 }}>
@@ -348,7 +349,7 @@ function LatexLab() {
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'skillbridge_cv.tex'; a.click();
+    a.href = url; a.download = `skillbridge_${activeTemplate}.tex`; a.click();
     URL.revokeObjectURL(url);
     addToast('.tex file downloaded — compile with pdflatex or Overleaf', 'success');
   };
@@ -361,26 +362,120 @@ function LatexLab() {
   return (
     <div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Templates:</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>Templates:</span>
         {Object.keys(LATEX_TEMPLATES).map(k => (
-          <button key={k} className={`btn-chip ${activeTemplate === k ? 'active' : ''}`} onClick={() => { setCode(LATEX_TEMPLATES[k]); setActiveTemplate(k); }}>
+          <button
+            key={k}
+            type="button"
+            className={`btn-chip ${activeTemplate === k ? 'active' : ''}`}
+            onClick={() => { setCode(LATEX_TEMPLATES[k]); setActiveTemplate(k); }}
+          >
             {k.charAt(0).toUpperCase() + k.slice(1)}
           </button>
         ))}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-          <button className="btn btn-secondary btn-sm" onClick={openOverleaf}>Open Overleaf</button>
-          <button id="latex-download-btn" className="btn btn-primary btn-sm" onClick={download}>Download .tex</button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={openOverleaf}>Open in Overleaf ↗</button>
+          <button type="button" id="latex-download-btn" className="btn btn-primary btn-sm" onClick={download}>Download .tex</button>
         </div>
       </div>
-      <textarea
-        id="latex-editor"
-        className="code-editor"
-        value={code}
-        onChange={e => setCode(e.target.value)}
-        style={{ minHeight: 360 }}
-      />
-      <div style={{ marginTop: 8, padding: '10px 14px', background: 'rgba(59,130,246,0.08)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.15)', fontSize: 12, color: 'var(--text-muted)' }}>
-        LaTeX Preview coming soon. Download .tex and compile at <a href="https://overleaf.com" target="_blank" rel="noreferrer" style={{ color: 'var(--brand-light)' }}>Overleaf</a> (free) or with pdflatex.
+
+      {/* Editor & Preview Split Pane */}
+      <div className="lab-split-pane">
+        {/* Editor Pane */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="lab-toolbar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82F6' }} />
+              <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>LaTeX Source ({activeTemplate}.tex)</span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => { setCode(LATEX_TEMPLATES[activeTemplate]); addToast('Template reset', 'info'); }}
+              style={{ fontSize: 10, padding: '2px 8px' }}
+            >
+              Reset
+            </button>
+          </div>
+          <textarea
+            id="latex-editor"
+            className="lab-editor-area"
+            value={code}
+            onChange={e => setCode(e.target.value)}
+            style={{ minHeight: 380 }}
+            spellCheck={false}
+          />
+        </div>
+
+        {/* Live Document Preview Pane */}
+        <div className="lab-output-pane">
+          <div className="lab-toolbar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>Document Preview (Typeset View)</span>
+            </div>
+            <span className="badge badge-brand" style={{ fontSize: 9 }}>A4 Layout</span>
+          </div>
+
+          <div className="latex-preview-container">
+            <div className="latex-document-sheet">
+              {/* Document Header */}
+              <div className="latex-doc-header">
+                <h1 className="latex-doc-title">Alex Mercer</h1>
+                <div className="latex-doc-contact">
+                  alex.mercer@email.com &bull; +91 98765 43210 &bull; Bengaluru, India
+                </div>
+              </div>
+
+              {/* Professional Summary */}
+              <div className="latex-doc-section">
+                <div className="latex-doc-heading">Professional Summary</div>
+                <p className="latex-doc-p">
+                  Software & Machine Learning Engineer with 4+ years building high-throughput ML systems and automated pipelines. Experienced in PyTorch, Docker, Kubernetes, and AWS deployment.
+                </p>
+              </div>
+
+              {/* Technical Skills */}
+              <div className="latex-doc-section">
+                <div className="latex-doc-heading">Technical Competencies</div>
+                <ul className="latex-doc-list">
+                  <li><strong>Languages:</strong> Python, SQL, C++, Bash</li>
+                  <li><strong>Machine Learning:</strong> PyTorch, Scikit-learn, MLOps, Transformers</li>
+                  <li><strong>Cloud & DevOps:</strong> Docker, Kubernetes, AWS (S3, EC2, SageMaker), CI/CD</li>
+                  <li><strong>Data Engineering:</strong> Apache Spark, Kafka, PostgreSQL, Redis</li>
+                </ul>
+              </div>
+
+              {/* Experience */}
+              <div className="latex-doc-section">
+                <div className="latex-doc-heading">Professional Experience</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginTop: 4 }}>
+                  <span>Senior ML Platform Engineer &bull; Tech Corp</span>
+                  <span style={{ color: 'var(--text-subtle)' }}>2022 &ndash; Present</span>
+                </div>
+                <ul className="latex-doc-list">
+                  <li>Architected real-time feature retrieval serving 20M daily queries with p99 latency &lt; 25ms.</li>
+                  <li>Reduced training compute costs by 34% through mixed-precision PyTorch distributed training.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+        <span>Tip: Export as <code>.tex</code> and paste into Overleaf to compile with official pdflatex or XeLaTeX engines.</span>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => {
+            navigator.clipboard.writeText(code);
+            addToast('LaTeX source copied to clipboard!', 'success');
+          }}
+          style={{ fontSize: 11 }}
+        >
+          Copy .tex Code
+        </button>
       </div>
     </div>
   );
@@ -388,19 +483,20 @@ function LatexLab() {
 
 // ─── Code Labs Page ───────────────────────────────────────────────────────────
 export default function CodeLabsPage() {
-  const [tab, setTab] = useState('python');
+  const [tab, setTab] = useState('cloud-compiler');
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Interactive Code Labs</h1>
-          <p className="page-subtitle">Browser-based Python execution · SQL sandbox with real data · Professional LaTeX resume builder</p>
+          <h1 className="page-title">Interactive Code Labs & Cloud IDE</h1>
+          <p className="page-subtitle">Real multi-language online compiler · VS Code Web integration · In-browser Python & SQL engines · LaTeX studio</p>
         </div>
       </div>
 
       <div className="tab-list">
         {[
+          { key: 'cloud-compiler', label: '⚡ VS Code & Real Compiler' },
           { key: 'python', label: 'Python Lab' },
           { key: 'sql', label: 'SQL Playground' },
           { key: 'latex', label: 'LaTeX Resume Builder' },
@@ -411,7 +507,8 @@ export default function CodeLabsPage() {
         ))}
       </div>
 
-      <div className="card">
+      <div className="card" style={{ padding: tab === 'cloud-compiler' ? 0 : undefined, overflow: 'hidden' }}>
+        {tab === 'cloud-compiler' && <CloudOnlineCompiler />}
         {tab === 'python' && <PythonLab />}
         {tab === 'sql' && <SQLLab />}
         {tab === 'latex' && <LatexLab />}

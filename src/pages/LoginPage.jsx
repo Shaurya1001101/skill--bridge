@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Eye, EyeOff, Sparkles, ArrowRight, ShieldCheck, CheckCircle2,
-  TrendingUp, Brain, Code2, Zap, Star, Users, Terminal
+  TrendingUp, Brain, Code2, Zap, Star, Users, Terminal, Sun, Moon
 } from 'lucide-react';
 import useStore from '../store/useStore.js';
+import { apiUrl } from '../lib/api.js';
 
 const DEMO_USER = { email: 'user@skillbridge.io', password: 'User@2024', name: 'Alex Mercer' };
 
 export default function LoginPage() {
   const initUserSession = useStore(s => s.initUserSession);
+  const theme = useStore(s => s.theme);
+  const toggleTheme = useStore(s => s.toggleTheme);
   const navigate = useNavigate();
 
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -29,7 +32,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/auth', {
+      const res = await fetch(apiUrl('/api/auth'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'demo' })
@@ -58,7 +61,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth', {
+      const res = await fetch(apiUrl('/api/auth'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'login', email, password })
@@ -99,7 +102,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth', {
+      const res = await fetch(apiUrl('/api/auth'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'register', name, email, password })
@@ -135,6 +138,17 @@ export default function LoginPage() {
       <div className="login-ambient-blob blob-1" />
       <div className="login-ambient-blob blob-2" />
 
+      {/* Floating Theme Switcher on Login Page */}
+      <button
+        type="button"
+        className="login-theme-pill"
+        onClick={toggleTheme}
+        title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? <><Sun size={14} color="var(--brand)" /> <span>Light</span></> : <><Moon size={14} color="var(--brand)" /> <span>Dark</span></>}
+      </button>
+
       <div className="login-wrapper">
         {/* Left Column: Brand Platform Showcase (Elite SaaS style) */}
         <div className="login-showcase-panel">
@@ -154,7 +168,7 @@ export default function LoginPage() {
 
           <div className="showcase-headline-group">
             <div className="showcase-pill">
-              <Sparkles size={13} color="#818CF8" />
+              <Sparkles size={13} />
               <span>Next-Gen Skill Diagnostics & Simulation</span>
             </div>
             <h1 className="showcase-title">
@@ -168,21 +182,21 @@ export default function LoginPage() {
           {/* Feature Highlights Grid */}
           <div className="showcase-features-grid">
             <div className="showcase-feature-card">
-              <div className="showcase-card-icon"><Brain size={18} color="#818CF8" /></div>
+              <div className="showcase-card-icon"><Brain size={18} /></div>
               <div>
                 <div className="showcase-card-title">Client-Side AI Diagnostic</div>
                 <div className="showcase-card-text">Drag-and-drop resume parser with zero external cloud leaks.</div>
               </div>
             </div>
             <div className="showcase-feature-card">
-              <div className="showcase-card-icon"><TrendingUp size={18} color="#06B6D4" /></div>
+              <div className="showcase-card-icon"><TrendingUp size={18} /></div>
               <div>
                 <div className="showcase-card-title">Monte Carlo Trajectories</div>
                 <div className="showcase-card-text">Compare Conservative, Balanced, and Aggressive hiring curves.</div>
               </div>
             </div>
             <div className="showcase-feature-card">
-              <div className="showcase-card-icon"><Code2 size={18} color="#10B981" /></div>
+              <div className="showcase-card-icon"><Code2 size={18} /></div>
               <div>
                 <div className="showcase-card-title">In-Browser Code Labs</div>
                 <div className="showcase-card-text">Full interactive Python AST runner, SQL database, and LaTeX editor.</div>

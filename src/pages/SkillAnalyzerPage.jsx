@@ -291,7 +291,7 @@ export default function SkillAnalyzerPage() {
       </div>
 
       {/* Main Analyzer Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="responsive-two-col-grid">
         {/* Left Column: Upload & Text Input */}
         <div className="card">
           <div className="card-header">
