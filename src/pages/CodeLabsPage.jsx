@@ -1,131 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Play, Square, RotateCcw } from 'lucide-react';
 import useStore from '../store/useStore.js';
 import { LATEX_TEMPLATES } from '../lib/data.js';
 
-// ─── Python Simulator ─────────────────────────────────────────────────────────
-const PYTHON_BUILTINS = `
-import sys
-import math
-import json
-import re
-import collections
-import itertools
-import functools
+import { executePython, loadSkulpt } from '../lib/pythonRunner.js';
 
-# Simulated numpy-like arrays for demos
-class ndarray:
-    def __init__(self, data):
-        self.data = list(data) if hasattr(data, '__iter__') else [data]
-        self.shape = (len(self.data),)
-    def __repr__(self): return f"array({self.data})"
-    def __iter__(self): return iter(self.data)
-    def __len__(self): return len(self.data)
-    def __getitem__(self, i): return self.data[i]
-    def __add__(self, other):
-        if isinstance(other, ndarray): return ndarray([a+b for a,b in zip(self.data, other.data)])
-        return ndarray([a+other for a in self.data])
-    def __mul__(self, other):
-        if isinstance(other, ndarray): return ndarray([a*b for a,b in zip(self.data, other.data)])
-        return ndarray([a*other for a in self.data])
-    def __sub__(self, other):
-        if isinstance(other, ndarray): return ndarray([a-b for a,b in zip(self.data, other.data)])
-        return ndarray([a-other for a in self.data])
-
-class numpy:
-    def array(self, data): return ndarray(data)
-    def zeros(self, n): return ndarray([0]*n)
-    def ones(self, n): return ndarray([1]*n)
-    def sum(self, a): return sum(a)
-    def mean(self, a): return sum(a)/len(a)
-    def max(self, a): return max(a)
-    def min(self, a): return min(a)
-    def sqrt(self, x):
-        if isinstance(x, ndarray): return ndarray([math.sqrt(abs(v)) for v in x])
-        return math.sqrt(abs(x))
-    def exp(self, x):
-        if isinstance(x, ndarray): return ndarray([math.exp(v) for v in x])
-        return math.exp(x)
-    def log(self, x):
-        if isinstance(x, ndarray): return ndarray([math.log(abs(v)) for v in x])
-        return math.log(abs(x))
-    def random(self): return numpy_random()
-    def permutation(self, n): return ndarray(list(range(n)))
-    def argsort(self, a): return ndarray(sorted(range(len(a)), key=lambda i: a[i]))
-    def sort(self, a): return ndarray(sorted(a))
-    def dot(self, a, b): return sum(x*y for x,y in zip(a,b))
-
-class numpy_random:
-    def seed(self, s): pass
-    def shuffle(self, a): pass
-    def randn(self, *args): return 0.0
-    def rand(self, *args): return 0.5
-
-np = numpy()
-`;
-
-function evalPython(code) {
-  // Very safe JS-based Python simulation for basic ops
-  const output = [];
-  const mockPrint = (...args) => output.push(args.map(a => {
-    if (typeof a === 'object') return JSON.stringify(a);
-    return String(a);
-  }).join(' '));
-
-  try {
-    // Transform basic Python patterns for JS eval
-    let js = code
-      .replace(/^import numpy as np$/mg, '')
-      .replace(/^import numpy$/mg, '')
-      .replace(/^from collections import Counter$/mg, '')
-      .replace(/print\(/g, '__print(')
-      .replace(/def (\w+)\((.*?)\):/g, 'function $1($2) {')
-      .replace(/^\s{4}/mg, '  ')
-      .replace(/\*\*(\w+|[\d.]+)/g, '** $1')
-      .replace(/# .*/g, '')
-      .replace(/True/g, 'true')
-      .replace(/False/g, 'false')
-      .replace(/None/g, 'null')
-      .replace(/elif /g, 'else if ')
-      .replace(/:\s*$/mg, '{')
-      .replace(/f"([^"]*)"/g, (_, s) => '`' + s.replace(/\{(\w+)\}/g, '${$1}') + '`')
-      .replace(/f'([^']*)'/g, (_, s) => '`' + s.replace(/\{(\w+)\}/g, '${$1}') + '`');
-
-    // Just run a safer string-based evaluation
-    const fn = new Function('__print', 'np', 'math', 'Counter', '__code', `
-      ${PYTHON_BUILTINS}
-      try {
-        ${code
-          .split('\n')
-          .map(line => line.trim())
-          .filter(l => l && !l.startsWith('#') && !l.startsWith('import'))
-          .map(l => l
-            .replace(/print\(/g, '__print(')
-            .replace(/True/g, 'true')
-            .replace(/False/g, 'false')
-            .replace(/None/g, 'null')
-            .replace(/\*\*2/g, '**2')
-          ).join('\n')
-        }
-      } catch(e) { __print('Error: ' + e.message); }
-    `);
-    fn(mockPrint, np, Math, Map, code);
-  } catch (e) {
-    output.push(`Execution error: ${e.message}`);
-  }
-  return output.join('\n') || '(no output)';
-}
 
 // ─── Python Lab ───────────────────────────────────────────────────────────────
 const PYTHON_PRESETS = {
-  pandas: `# Pandas-style operations (simulated)
-data = {'name': ['Alice', 'Bob', 'Charlie'], 'score': [92, 78, 85]}
-scores = data['score']
-mean_score = sum(scores) / len(scores)
-max_score = max(scores)
-print(f"Mean: {mean_score:.1f}, Max: {max_score}")
-above_avg = [n for n, s in zip(data['name'], scores) if s >= mean_score]
-print(f"Above average: {above_avg}")`,
+  hello: `# Python 3: Hello World & Basics
+print("hello world")
+name = "Alex"
+skills = ["Python", "SQL", "Machine Learning"]
+print(f"Welcome to SkillBridge, {name}!")
+print("Your active track has", len(skills), "key skills:")
+for s in skills:
+    print("  →", s)`,
   ml: `# ML: Sigmoid Function
 import numpy as np
 
@@ -137,9 +27,18 @@ print("Sigmoid values:")
 for v in values:
     sig = sigmoid(v)
     print(f"  sigmoid({v}) = {sig:.4f}")`,
+  pandas: `# Pandas-style operations (simulated)
+data = {'name': ['Alice', 'Bob', 'Charlie'], 'score': [92, 78, 85]}
+scores = data['score']
+mean_score = sum(scores) / len(scores)
+max_score = max(scores)
+print(f"Mean: {mean_score:.1f}, Max: {max_score}")
+above_avg = [n for n, s in zip(data['name'], scores) if s >= mean_score]
+print(f"Above average: {above_avg}")`,
   algo: `# Binary Search Algorithm
 def binary_search(arr, target):
-    left, right = 0, len(arr) - 1
+    left = 0
+    right = len(arr) - 1
     while left <= right:
         mid = (left + right) // 2
         if arr[mid] == target:
@@ -157,37 +56,46 @@ print(f"Searching for {target} in {arr}")
 print(f"Found at index: {result}")`,
   knn: `# K-Nearest Neighbors (step by step)
 def euclidean_dist(p1, p2):
-    return sum((a-b)**2 for a,b in zip(p1,p2)) ** 0.5
+    return sum([(a-b)**2 for a,b in zip(p1,p2)]) ** 0.5
 
 X_train = [[1,1],[2,2],[3,1],[6,6],[7,7],[8,6]]
 y_train = [0,0,0,1,1,1]
 test_point = [2,1]
 k = 3
 
-dists = [(euclidean_dist(test_point, x), y) for x,y in zip(X_train, y_train)]
-dists.sort(key=lambda d: d[0])
+dists = [[euclidean_dist(test_point, x), y] for x,y in zip(X_train, y_train)]
+dists.sort()
 k_nearest = dists[:k]
-print(f"Query: {test_point}")
+print("Query:", test_point)
 for d, label in k_nearest:
     print(f"  distance={d:.2f}, class={label}")
-votes = sum(1 for _, y in k_nearest if y==1)
+votes = sum([1 for d, y in k_nearest if y==1])
 pred = 1 if votes > k//2 else 0
 print(f"Predicted class: {pred}")`,
 };
 
 function PythonLab() {
-  const [code, setCode] = useState(PYTHON_PRESETS.ml);
+  const [code, setCode] = useState(PYTHON_PRESETS.hello);
   const [output, setOutput] = useState('# Output appears here\n# Click Run to execute');
   const [running, setRunning] = useState(false);
-  const [preset, setPreset] = useState('ml');
+  const [preset, setPreset] = useState('hello');
   const addToast = useStore(s => s.addToast);
+
+  // Pre-load Skulpt in background
+  useEffect(() => {
+    loadSkulpt();
+  }, []);
 
   const run = async () => {
     setRunning(true);
-    await new Promise(r => setTimeout(r, 600));
-    const result = evalPython(code);
-    setOutput(result);
-    setRunning(false);
+    try {
+      const result = await executePython(code);
+      setOutput(result);
+    } catch (err) {
+      setOutput(`Execution error: ${err.message}`);
+    } finally {
+      setRunning(false);
+    }
   };
 
   const loadPreset = (key) => {

@@ -1,16 +1,129 @@
-# React + Vite
+# 🌉 SkillBridge — Frontend Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Hey there! Welcome to the frontend of **SkillBridge**. 👋
 
-Currently, two official plugins are available:
+If you've ever tried switching tech roles or learning something new like Machine Learning, you probably know the feeling: **"What do I actually need to learn next, and how big is the gap between my current skills and what companies want?"**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+SkillBridge was built to answer exactly that. It's a free, interactive web app where you can diagnose your skills, see a custom learning roadmap, practice coding right in your browser, and build daily habits with XP and streaks.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎯 What Does It Do? (Feature Walkthrough)
 
-## Expanding the Oxlint configuration
+Here is a quick tour of what you can do on the platform:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+### 1. 🧠 AI Skill Gap Analyzer
+- Upload your resume (`.pdf` or `.docx`) or manually select your skills.
+- Pick a target job role (like *Machine Learning Engineer*, *Full Stack Developer*, *Data Scientist*, etc.).
+- The app generates an instant **visual radar chart** comparing your skills against industry expectations, highlighting critical gaps in red and strengths in green.
+
+### 2. 🗺️ Custom Learning Roadmaps
+- Based on your target role, SkillBridge builds a personalized week-by-week action plan.
+- Check off weekly milestones, toggle your learning pace (accelerated vs. balanced), and track your progress over time.
+
+### 3. 💻 Interactive Code Labs
+- **Python Lab:** Write and run real Python code directly in your browser. From simple `print("hello world")` to algorithms like Binary Search, Sigmoid math functions, and Pandas-style operations.
+- **SQL Playground:** Query real dummy datasets (employees, job postings) using `SELECT`, `WHERE`, `GROUP BY`, and `ORDER BY` with instant tabular results.
+- **LaTeX Resume Builder:** Choose clean resume templates, edit them live, and download the `.tex` file to compile on Overleaf.
+
+### 4. ⚡ Daily Coding Challenge & XP
+- A fresh problem every day to keep your mind sharp.
+- Earn **XP points**, level up, and maintain a **daily streak** counter so you stay consistent.
+
+### 5. 🤖 AI Career Mentor
+- An embedded AI assistant you can chat with anytime.
+- Ask questions like *"How do I transition from Python basics to MLOps?"* or *"What projects will make my resume stand out for junior ML roles?"*
+
+### 6. 📰 Live Tech Pulse & News
+- Real-time curated updates on hiring trends, top rising frameworks, and salary benchmarks.
+
+---
+
+## 🛠️ Tech Stack (Under the Hood)
+
+We kept the frontend modern, fast, and lightweight:
+- **React 19** with **Vite** — blazing fast hot-reload and instant build times.
+- **Tailwind CSS v4** — clean, dark-mode-first aesthetic with sleek glassmorphism and animations.
+- **Recharts** — interactive radar charts, skill gap heatmaps, and progress curves.
+- **Zustand** — simple, lightweight state management that keeps your XP, streaks, and user profile in sync.
+- **Lucide React** — sharp, modern icons across every screen.
+
+---
+
+## 🚀 How to Run It on Your Computer
+
+Running the app locally takes less than a minute.
+
+### 1. Navigate to the frontend folder
+Open your terminal or Command Prompt and run:
+```bash
+cd "c:\local disk\Skill bridge\skillbridge\frontend"
+```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Start the local development server
+```bash
+npm run dev
+```
+
+That's it! Your terminal will show a link like `http://localhost:5173`. Open that in your browser to start using SkillBridge.
+
+---
+
+## 🔗 Connecting to the Backend
+
+The frontend is built to be smart:
+- **With the Backend Running:** If you start the backend server (`http://localhost:5000`), the frontend automatically routes all login, signup, profile updates, and milestone syncs directly to the Express server and **Supabase PostgreSQL**.
+- **Offline / Standalone:** If the backend isn't running, you can still test everything! Click **"1-Click Demo Login"** on the login page to immediately explore the app with pre-loaded demo data.
+
+---
+
+## 📁 Folder Structure Explained
+
+```text
+frontend/
+├── public/              # Static assets (logos, icons)
+├── src/
+│   ├── components/      # Reusable UI pieces (Navbar, Sidebar, Modals, Buttons)
+│   ├── lib/             # Helper utilities (Python runner, data calculations)
+│   ├── pages/           # All the main pages of the app:
+│   │   ├── LoginPage.jsx          # Login & Signup screen
+│   │   ├── DashboardPage.jsx      # Main dashboard with KPIs and skill pulse
+│   │   ├── SkillAnalyzerPage.jsx  # Resume parsing and skill diagnostics
+│   │   ├── CodeLabsPage.jsx       # Interactive Python, SQL & LaTeX sandboxes
+│   │   ├── TrajectoryPage.jsx     # Learning roadmap & weekly milestones
+│   │   ├── DailyProblemPage.jsx   # Hands-on daily coding challenge
+│   │   ├── JobsPage.jsx           # Tech job listings and requirements
+│   │   ├── SettingsPage.jsx       # Account, theme, and API key preferences
+│   │   └── HelpPage.jsx           # AI career mentor chat & FAQs
+│   ├── store/
+│   │   └── useStore.js            # Zustand store (syncs user session & XP)
+│   ├── App.jsx          # Main router and layout wrapper
+│   ├── main.jsx         # React application entry point
+│   └── index.css        # Design system styles and custom animations
+├── index.html           # HTML template
+├── vite.config.js       # Vite configuration with auto-proxy to backend
+└── package.json         # Dependencies and start scripts
+```
+
+---
+
+## 🚢 Building for Production
+
+If you want to package the app for production (e.g. to host on Vercel, Netlify, or GitHub Pages):
+
+```bash
+npm run build
+```
+
+This creates an optimized, minified bundle inside the `dist/` folder ready for zero-config deployment.
+
+---
+
+## 🤝 Contributing & Feedback
+
+Have ideas for new daily challenges, Python presets, or improvements? Feel free to open an issue or submit a pull request!

@@ -9,7 +9,7 @@ import useStore from '../store/useStore.js';
 const DEMO_USER = { email: 'user@skillbridge.io', password: 'User@2024', name: 'Alex Mercer' };
 
 export default function LoginPage() {
-  const setUser = useStore(s => s.setUser);
+  const initUserSession = useStore(s => s.initUserSession);
   const navigate = useNavigate();
 
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -28,8 +28,26 @@ export default function LoginPage() {
   const handleDemoSignIn = async () => {
     setError('');
     setLoading(true);
-    await new Promise(r => setTimeout(r, 350));
-    setUser({ name: DEMO_USER.name, email: DEMO_USER.email, role: 'User' });
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'demo' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        initUserSession(data);
+        navigate('/');
+        return;
+      }
+    } catch {
+      // Fallback to local demo if backend is offline
+    }
+    initUserSession({
+      user: { id: 1, name: DEMO_USER.name, email: DEMO_USER.email, role: 'User' },
+      profile: { xp: 50, streak: 3, targetRole: 'ml-engineer', skills: { all: ['Python', 'SQL', 'Git'] } },
+      committedPath: { role: 'ml-engineer', pacing: 'balanced', completedTaskIds: ['task-1', 'task-2'] }
+    });
     navigate('/');
   };
 
@@ -38,17 +56,37 @@ export default function LoginPage() {
     setError('');
     if (!email || !password) { setError('Please enter your email and password.'); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 400));
 
-    const stored = JSON.parse(localStorage.getItem('sb_users') || '[]');
-    const all = [DEMO_USER, ...stored];
-    const found = all.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-
-    if (found || email.toLowerCase() === DEMO_USER.email.toLowerCase()) {
-      setUser({ name: found?.name || 'Alex Mercer', email: email.toLowerCase(), role: 'User' });
-      navigate('/');
-    } else {
-      setError('Invalid credentials. Use 1-Click Demo Login or click "Fill Demo Creds".');
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        initUserSession(data);
+        navigate('/');
+        return;
+      } else {
+        setError(data.error || 'Invalid credentials.');
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // Local fallback for offline mode
+      const stored = JSON.parse(localStorage.getItem('sb_users') || '[]');
+      const all = [DEMO_USER, ...stored];
+      const found = all.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+      if (found || email.toLowerCase() === DEMO_USER.email.toLowerCase()) {
+        initUserSession({
+          user: { id: 99, name: found?.name || 'Alex Mercer', email: email.toLowerCase(), role: 'User' },
+          profile: { xp: 0, streak: 1, targetRole: 'ml-engineer', skills: { all: [] } }
+        });
+        navigate('/');
+        return;
+      }
+      setError('Invalid credentials. Check your email/password or use 1-Click Demo Login.');
     }
     setLoading(false);
   };
@@ -58,12 +96,37 @@ export default function LoginPage() {
     setError('');
     if (!name || !email || !password) { setError('Please fill all required fields.'); return; }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    setLoading(true);
 
-    const stored = JSON.parse(localStorage.getItem('sb_users') || '[]');
-    stored.push({ name, email, password });
-    localStorage.setItem('sb_users', JSON.stringify(stored));
-    setUser({ name, email, role: 'User' });
-    navigate('/');
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'register', name, email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        initUserSession(data);
+        navigate('/');
+        return;
+      } else {
+        setError(data.error || 'Registration failed.');
+        setLoading(false);
+        return;
+      }
+    } catch {
+      const stored = JSON.parse(localStorage.getItem('sb_users') || '[]');
+      const newU = { id: Date.now(), name, email, password, role: 'User' };
+      stored.push(newU);
+      localStorage.setItem('sb_users', JSON.stringify(stored));
+      initUserSession({
+        user: newU,
+        profile: { xp: 0, streak: 1, targetRole: 'ml-engineer', skills: { all: [] } },
+        committedPath: null
+      });
+      navigate('/');
+    }
+    setLoading(false);
   };
 
   return (

@@ -10,13 +10,116 @@ const useStore = create((set, get) => ({
     set({ safetyScale: next });
   },
 
-  // ─── Auth ───────────────────────────────────────────────────────────────
+  // ─── Auth & User Session ────────────────────────────────────────────────
   user: storage.get('user', null),
   setUser: (user) => {
     storage.set('user', user);
     set({ user });
   },
-  logout: () => { storage.remove('user'); storage.remove('remember'); set({ user: null }); },
+  initUserSession: (authPayload) => {
+    const { user, profile, committedPath } = authPayload || {};
+    if (!user) return;
+
+    storage.set('user', user);
+
+    const xp = profile?.xp ?? 0;
+    const streak = profile?.streak ?? 1;
+    const targetRole = profile?.targetRole || 'ml-engineer';
+    const userSkills = profile?.skills || { all: [] };
+
+    let resolvedPath = null;
+    if (committedPath?.role) {
+      resolvedPath = {
+        ...generatePathSchedule(committedPath.role, committedPath.pacing || 'balanced'),
+        completedTaskIds: committedPath.completedTaskIds || [],
+      };
+    } else if (user.email === 'user@skillbridge.io') {
+      resolvedPath = getDefaultCommittedPath();
+    }
+
+    storage.set('xp', xp);
+    storage.set('streak', streak);
+    storage.set('targetRole', targetRole);
+    storage.set('userSkills', userSkills);
+    storage.set('committedPath', resolvedPath);
+
+    // If a brand new user with no skills, reset any stale demo analysis artifacts
+    const hasSkills = userSkills?.all?.length > 0;
+    if (!hasSkills) {
+      storage.remove('gapResults');
+      storage.remove('completedWaypoints');
+      storage.remove('completedWeeks');
+      storage.remove('solvedProblems');
+      set({
+        user,
+        xp,
+        streak,
+        targetRole,
+        userSkills,
+        committedPath: resolvedPath,
+        gapResults: null,
+        completedWaypoints: [],
+        completedWeeks: [],
+        solvedProblems: [],
+      });
+    } else {
+      set({
+        user,
+        xp,
+        streak,
+        targetRole,
+        userSkills,
+        committedPath: resolvedPath,
+      });
+    }
+  },
+  logout: () => {
+    storage.remove('user');
+    storage.remove('remember');
+    storage.remove('xp');
+    storage.remove('streak');
+    storage.remove('gapResults');
+    storage.remove('userSkills');
+    storage.remove('committedPath');
+    storage.remove('completedWaypoints');
+    storage.remove('completedWeeks');
+    storage.remove('solvedProblems');
+    set({
+      user: null,
+      xp: 0,
+      streak: 0,
+      gapResults: null,
+      userSkills: { all: [] },
+      committedPath: null,
+      completedWaypoints: [],
+      completedWeeks: [],
+      solvedProblems: [],
+    });
+  },
+
+  // ─── Real-time PostgreSQL Backend Synchronization ───────────────────────
+  syncToBackend: async () => {
+    const user = get().user;
+    if (!user?.id) return;
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': String(user.id),
+        },
+        body: JSON.stringify({
+          xp: get().xp,
+          streak: get().streak,
+          targetRole: get().targetRole,
+          skills: get().userSkills,
+          completedTaskIds: get().committedPath?.completedTaskIds || [],
+        }),
+      });
+    } catch (e) {
+      console.warn('Background sync with Supabase failed:', e);
+    }
+  },
 
   // ─── Theme ──────────────────────────────────────────────────────────────
   theme: storage.get('theme', 'dark'),
@@ -28,21 +131,40 @@ const useStore = create((set, get) => ({
   },
 
   // ─── Committed Path & Gamified Schedule ─────────────────────────────────
-  committedPath: storage.get('committedPath', getDefaultCommittedPath()),
-  commitPath: (role = 'ml-engineer', pacing = 'balanced') => {
+  committedPath: storage.get('committedPath', null),
+  commitPath: async (role = 'ml-engineer', pacing = 'balanced') => {
     const currentCompleted = get().committedPath?.completedTaskIds || [];
     const newPath = generatePathSchedule(role, pacing);
-    newPath.completedTaskIds = currentCompleted.filter(id => newPath.tasks.some(t => t.id === id));
+    newPath.completedTaskIds = currentCompleted.filter((id) =>
+      newPath.tasks.some((t) => t.id === id)
+    );
     storage.set('committedPath', newPath);
     set({ committedPath: newPath });
     get().addXP(50);
     get().addToast(`🚀 Committed to ${pacing.toUpperCase()} path for ${role}! +50 XP awarded`, 'success');
+
+    // Sync path commitment with backend
+    const user = get().user;
+    if (user?.id) {
+      try {
+        await fetch('/api/path', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': String(user.id),
+          },
+          body: JSON.stringify({ roleKey: role, pacingKey: pacing }),
+        });
+      } catch (e) {
+        console.warn('Failed to sync path to backend:', e);
+      }
+    }
   },
-  toggleTaskComplete: (taskId) => {
+  toggleTaskComplete: async (taskId) => {
     const path = get().committedPath || getDefaultCommittedPath();
     const curr = path.completedTaskIds || [];
     const isCompleted = curr.includes(taskId);
-    const next = isCompleted ? curr.filter(id => id !== taskId) : [...curr, taskId];
+    const next = isCompleted ? curr.filter((id) => id !== taskId) : [...curr, taskId];
     const updatedPath = { ...path, completedTaskIds: next };
 
     storage.set('committedPath', updatedPath);
@@ -57,39 +179,75 @@ const useStore = create((set, get) => ({
       set({ xp: newXP });
       get().addToast('Task marked incomplete', 'info');
     }
+
+    // Sync task state with backend
+    const user = get().user;
+    if (user?.id) {
+      try {
+        await fetch('/api/path', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': String(user.id),
+          },
+          body: JSON.stringify({
+            taskId,
+            isCompleted: !isCompleted,
+            xpAwarded: !isCompleted ? 25 : 0,
+          }),
+        });
+      } catch (e) {
+        console.warn('Failed to sync task toggle to backend:', e);
+      }
+    }
   },
   setPacing: (pacingKey) => {
     const path = get().committedPath || getDefaultCommittedPath();
     const currentCompleted = path.completedTaskIds || [];
     const newPath = generatePathSchedule(path.role || 'ml-engineer', pacingKey);
-    newPath.completedTaskIds = currentCompleted.filter(id => newPath.tasks.some(t => t.id === id));
+    newPath.completedTaskIds = currentCompleted.filter((id) =>
+      newPath.tasks.some((t) => t.id === id)
+    );
     storage.set('committedPath', newPath);
     set({ committedPath: newPath });
     get().addToast(`Pacing updated to ${pacingKey.toUpperCase()}`, 'info');
+    get().syncToBackend();
   },
 
   // ─── Gap Analysis ───────────────────────────────────────────────────────
   gapResults: storage.get('gapResults', null),
-  setGapResults: (r) => { storage.set('gapResults', r); set({ gapResults: r }); },
+  setGapResults: (r) => {
+    storage.set('gapResults', r);
+    set({ gapResults: r });
+  },
 
-  // User's current skill levels (set by gap analysis)
-  userSkills: storage.get('userSkills', {}),
-  setUserSkills: (skills) => { storage.set('userSkills', skills); set({ userSkills: skills }); },
+  // User's current skill levels
+  userSkills: storage.get('userSkills', { all: [] }),
+  setUserSkills: (skills) => {
+    storage.set('userSkills', skills);
+    set({ userSkills: skills });
+    get().syncToBackend();
+  },
 
   targetRole: storage.get('targetRole', 'ml-engineer'),
-  setTargetRole: (r) => { storage.set('targetRole', r); set({ targetRole: r }); },
+  setTargetRole: (r) => {
+    storage.set('targetRole', r);
+    set({ targetRole: r });
+    get().syncToBackend();
+  },
 
   // ─── Analyzer Results ───────────────────────────────────────────────────
   analyzerExtracted: null,
   analyzerRole: 'ml-engineer',
   analyzerResults: null,
-  setAnalyzerResults: (extracted, role, results) => set({ analyzerExtracted: extracted, analyzerRole: role, analyzerResults: results }),
+  setAnalyzerResults: (extracted, role, results) =>
+    set({ analyzerExtracted: extracted, analyzerRole: role, analyzerResults: results }),
 
   // ─── Waypoints ──────────────────────────────────────────────────────────
   completedWaypoints: storage.get('completedWaypoints', []),
   toggleWaypoint: (id) => {
     const curr = get().completedWaypoints;
-    const next = curr.includes(id) ? curr.filter(w => w !== id) : [...curr, id];
+    const next = curr.includes(id) ? curr.filter((w) => w !== id) : [...curr, id];
     storage.set('completedWaypoints', next);
     set({ completedWaypoints: next });
   },
@@ -98,7 +256,7 @@ const useStore = create((set, get) => ({
   completedWeeks: storage.get('completedWeeks', []),
   toggleWeek: (key) => {
     const curr = get().completedWeeks;
-    const next = curr.includes(key) ? curr.filter(w => w !== key) : [...curr, key];
+    const next = curr.includes(key) ? curr.filter((w) => w !== key) : [...curr, key];
     storage.set('completedWeeks', next);
     set({ completedWeeks: next });
   },
@@ -108,6 +266,14 @@ const useStore = create((set, get) => ({
   streak: storage.get('streak', 0),
   lastSolvedDate: storage.get('lastSolvedDate', null),
   solvedProblems: storage.get('solvedProblems', []),
+  setXP: (xp) => {
+    storage.set('xp', xp);
+    set({ xp });
+  },
+  setStreak: (streak) => {
+    storage.set('streak', streak);
+    set({ streak });
+  },
   addXP: (pts) => {
     const newXP = get().xp + pts;
     storage.set('xp', newXP);
@@ -118,6 +284,7 @@ const useStore = create((set, get) => ({
     storage.set('streak', newStreak);
     storage.set('lastSolvedDate', today);
     set({ xp: newXP, streak: newStreak, lastSolvedDate: today });
+    get().syncToBackend();
   },
   markProblemSolved: (id) => {
     const curr = get().solvedProblems;
@@ -131,49 +298,39 @@ const useStore = create((set, get) => ({
 
   // ─── Improvement Map ────────────────────────────────────────────────────
   planDuration: storage.get('planDuration', 12),
-  setPlanDuration: (d) => { storage.set('planDuration', d); set({ planDuration: d }); },
+  setPlanDuration: (d) => {
+    storage.set('planDuration', d);
+    set({ planDuration: d });
+  },
   completedMilestones: storage.get('completedMilestones', []),
   toggleMilestone: (key) => {
     const curr = get().completedMilestones;
-    const next = curr.includes(key) ? curr.filter(m => m !== key) : [...curr, key];
+    const next = curr.includes(key) ? curr.filter((m) => m !== key) : [...curr, key];
     storage.set('completedMilestones', next);
     set({ completedMilestones: next });
   },
 
   // ─── Settings ───────────────────────────────────────────────────────────
-  notifications: storage.get('notifications', { weeklyDigest: true, streakReminder: true, newsAlerts: false }),
-  setNotifications: (n) => { storage.set('notifications', n); set({ notifications: n }); },
+  notifications: storage.get('notifications', {
+    weeklyDigest: true,
+    streakReminder: true,
+    newsAlerts: false,
+  }),
+  setNotifications: (n) => {
+    storage.set('notifications', n);
+    set({ notifications: n });
+  },
 
   // ─── Toasts ─────────────────────────────────────────────────────────────
   toasts: [],
   addToast: (msg, type = 'info') => {
     const id = Date.now() + Math.random();
-    set(s => ({ toasts: [...s.toasts, { id, msg, type }] }));
-    setTimeout(() => set(s => ({ toasts: s.toasts.filter(t => t.id !== id) })), 3500);
+    set((s) => ({ toasts: [...s.toasts, { id, msg, type }] }));
+    setTimeout(() => {
+      set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+    }, 3800);
   },
-  removeToast: (id) => set(s => ({ toasts: s.toasts.filter(t => t.id !== id) })),
-
-  // ─── AI Chat ────────────────────────────────────────────────────────────
-  chatOpen: false,
-  chatMessages: [],
-  toggleChat: () => set(s => ({ chatOpen: !s.chatOpen })),
-  addChatMessage: (msg) => set(s => ({ chatMessages: [...s.chatMessages, msg] })),
-  clearChat: () => set({ chatMessages: [] }),
-
-  // ─── Notifications Panel ────────────────────────────────────────────────
-  notifOpen: false,
-  toggleNotif: () => set(s => ({ notifOpen: !s.notifOpen })),
-
-  // ─── Navigation ─────────────────────────────────────────────────────────
-  sidebarCollapsed: storage.get('sidebarCollapsed', false),
-  toggleSidebar: () => {
-    const next = !get().sidebarCollapsed;
-    storage.set('sidebarCollapsed', next);
-    set({ sidebarCollapsed: next });
-  },
-  mobileSidebarOpen: false,
-  toggleMobileSidebar: () => set(s => ({ mobileSidebarOpen: !s.mobileSidebarOpen })),
-  closeMobileSidebar: () => set({ mobileSidebarOpen: false }),
+  removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));
 
 export default useStore;

@@ -218,8 +218,10 @@ export default function DashboardPage() {
   const streak = useStore(s => s.streak);
   const solvedProblems = useStore(s => s.solvedProblems);
 
-  const gapSkills = gapResults?.gaps || [];
-  const readiness = gapResults?.readiness || 67;
+  const isDemo = user?.email === 'user@skillbridge.io';
+  const hasAnalysis = Boolean(gapResults);
+  const gapSkills = gapResults?.gaps || (isDemo ? ['MLOps', 'PyTorch', 'Docker', 'Kubernetes'] : []);
+  const readiness = gapResults?.readiness !== undefined ? gapResults.readiness : isDemo ? 67 : 0;
 
   // Ticker items
   const TICKER = [
@@ -262,12 +264,29 @@ export default function DashboardPage() {
         <button className="btn btn-secondary btn-sm" onClick={() => navigate('/jobs')}>Explore Jobs →</button>
       </div>
 
+      {/* Onboarding Welcome Banner for newly registered users */}
+      {!hasAnalysis && !isDemo && (
+        <div className="card" style={{ marginBottom: 20, background: 'linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.08))', borderColor: 'rgba(59,130,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>
+              🎯 Welcome to SkillBridge, {user?.name || 'Developer'}!
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              Your profile is live on PostgreSQL. Run your first diagnostic to analyze your current skills against target tech roles and unlock your custom learning path.
+            </div>
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate('/gap-analysis')} style={{ whiteSpace: 'nowrap' }}>
+            Start Diagnostic →
+          </button>
+        </div>
+      )}
+
       {/* KPI Grid */}
       <div className="kpi-grid">
-        <KPICard value={500} suffix="" label="Learners Evaluated" trend="+12 this month" trendUp colorClass="kpi-primary" />
-        <KPICard value={readiness} suffix="%" label="AI Readiness" trend="+5% vs last quarter" trendUp colorClass="kpi-success" />
-        <KPICard value={gapSkills.length || 8} suffix="" label="Critical Skill Gaps" trend={gapSkills.length > 0 ? `${gapSkills.length} gaps identified` : 'Run analysis'} trendUp={false} colorClass="kpi-warning" />
-        <KPICard value={43} suffix="" label="Upskilling Candidates" trend="Ready for transition" trendUp colorClass="kpi-info" />
+        <KPICard value={500} suffix="+" label="Platform Learners" trend="+12% active this month" trendUp colorClass="kpi-primary" />
+        <KPICard value={readiness} suffix="%" label="AI Readiness" trend={hasAnalysis ? 'Based on your diagnostic' : 'Diagnose skills to score'} trendUp={hasAnalysis} colorClass="kpi-success" />
+        <KPICard value={gapSkills.length} suffix="" label="Identified Gaps" trend={gapSkills.length > 0 ? `${gapSkills.length} skills to master` : '0 pending'} trendUp={false} colorClass="kpi-warning" />
+        <KPICard value={xp} suffix=" XP" label="Earned Experience" trend={`${streak}-day streak`} trendUp colorClass="kpi-info" />
       </div>
 
       {/* XP / Streak Row */}
@@ -321,25 +340,37 @@ export default function DashboardPage() {
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">Top Critical Gaps</h2>
-            <span className="badge badge-danger">Needs Action</span>
+            <span className={`badge ${gapSkills.length > 0 ? 'badge-danger' : 'badge-success'}`}>
+              {gapSkills.length > 0 ? 'Needs Action' : 'All Clear'}
+            </span>
           </div>
-          {HEATMAP_DATA.filter(d => d.pct < 55).sort((a, b) => a.pct - b.pct).slice(0, 6).map(d => {
-            const col = d.pct < 40 ? 'var(--danger)' : d.pct < 55 ? 'var(--warning)' : 'var(--info)';
-            return (
-              <div key={d.name} style={{ marginBottom: 10 }}>
+          {gapSkills.length > 0 ? (
+            gapSkills.slice(0, 5).map((gap, i) => (
+              <div key={gap} style={{ marginBottom: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{d.name}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: col }}>{d.pct}%</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{gap}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--danger)' }}>Critical Gap</span>
                 </div>
                 <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${d.pct}%`, background: col }} />
+                  <div className="progress-fill" style={{ width: `${Math.max(20, 55 - i * 7)}%`, background: 'var(--danger)' }} />
                 </div>
               </div>
-            );
-          })}
-          <button className="btn btn-secondary btn-sm" style={{ marginTop: 8 }} onClick={() => navigate('/gap-analysis')}>
-            Run Full Analysis <ArrowRight size={12} />
-          </button>
+            ))
+          ) : (
+            <div style={{ padding: '24px 12px', textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
+                No critical gaps identified yet. Diagnose your skills or upload a resume to populate your gaps matrix.
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate('/gap-analysis')}>
+                Diagnose Skills <ArrowRight size={12} />
+              </button>
+            </div>
+          )}
+          {gapSkills.length > 0 && (
+            <button className="btn btn-secondary btn-sm" style={{ marginTop: 8 }} onClick={() => navigate('/gap-analysis')}>
+              Run Full Analysis <ArrowRight size={12} />
+            </button>
+          )}
         </div>
 
         {/* Peer Benchmarks */}
