@@ -10,9 +10,7 @@ import useStore from '../../store/useStore.js';
 
 const FEATURE_TABS = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { path: '/analyzer', label: 'Skill Analyzer', icon: Brain, badge: 'AI' },
-  { path: '/gap-analysis', label: 'Gap Analysis', icon: BarChart2 },
-  { path: '/trajectory', label: 'Skill Trajectory', icon: TrendingUp, badge: 'Sim' },
+  { path: '/assessment', label: 'Skill Assessment', icon: Brain, badge: 'Guided' },
   { path: '/improvement-map', label: 'Improvement Map', icon: Map, badge: 'Plan' },
   { path: '/code-labs', label: 'Code Labs', icon: Code2, badge: 'IDE' },
   { path: '/jobs', label: 'Job Market', icon: Briefcase },
@@ -68,14 +66,12 @@ export default function TopNavbar() {
   const handleSearch = (e) => {
     if (e.key === 'Enter' && search.trim()) {
       const term = search.toLowerCase();
-      if (term.includes('gap')) navigate('/gap-analysis');
+      if (term.includes('assessment') || term.includes('gap') || term.includes('analyz') || term.includes('resume') || term.includes('trajectory') || term.includes('simul')) navigate('/assessment');
       else if (term.includes('video') || term.includes('learn')) navigate('/videos');
       else if (term.includes('job')) navigate('/jobs');
       else if (term.includes('code') || term.includes('python') || term.includes('sql')) navigate('/code-labs');
       else if (term.includes('problem')) navigate('/daily-problem');
-      else if (term.includes('trajectory') || term.includes('simul')) navigate('/trajectory');
       else if (term.includes('map') || term.includes('roadmap') || term.includes('calendar')) navigate('/improvement-map');
-      else if (term.includes('analyz') || term.includes('resume')) navigate('/analyzer');
       else if (term.includes('setting')) navigate('/settings');
       else if (term.includes('help') || term.includes('faq')) navigate('/help');
       else navigate('/');
@@ -135,17 +131,6 @@ export default function TopNavbar() {
             <span className="xp-divider">|</span>
             <span className="xp-indicator">{xp} XP</span>
           </div>
-
-          {/* 90% View Safety Scale Toggle (Desktop) */}
-          <button
-            type="button"
-            className={`scale-safety-pill desktop-only ${safetyScale ? 'active' : ''}`}
-            onClick={toggleSafetyScale}
-            title={safetyScale ? '90% View Safety active (ensures no clipping). Click for 100%.' : '100% Scale. Click for 90% View Safety mode.'}
-          >
-            <span className="scale-indicator-dot" />
-            <span>{safetyScale ? '90% View' : '100%'}</span>
-          </button>
 
           {/* Theme Toggle */}
           <button

@@ -100,15 +100,6 @@ export default function Topbar() {
           <span>Market Live</span>
         </button>
 
-        {/* 90% View Safety Scale Toggle */}
-        <button
-          className={`scale-safety-btn ${safetyScale ? 'active' : ''}`}
-          onClick={toggleSafetyScale}
-          title={safetyScale ? '90% View Safety Scale active (guarantees full dashboard visibility). Click to toggle 100%.' : '100% Scale. Click for 90% View Safety mode.'}
-        >
-          <span className="scale-indicator-dot" />
-          <span>{safetyScale ? '90% View' : '100%'}</span>
-        </button>
 
         {/* Theme toggle */}
         <button className="topbar-icon-btn" onClick={toggleTheme} title="Toggle theme">

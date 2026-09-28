@@ -11,6 +11,7 @@ const DEMO_USER = { email: 'user@skillbridge.io', password: 'User@2024', name: '
 
 export default function LoginPage() {
   const initUserSession = useStore(s => s.initUserSession);
+  const setUser = useStore(s => s.setUser);
   const theme = useStore(s => s.theme);
   const toggleTheme = useStore(s => s.toggleTheme);
   const navigate = useNavigate();

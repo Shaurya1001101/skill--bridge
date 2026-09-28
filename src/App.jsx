@@ -7,9 +7,7 @@ import AppLayout from './components/layout/AppLayout.jsx';
 // Route-based code splitting: heavy modules (charts, analyzers, IDE, PDF/Mammoth) load on demand
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
-const SkillAnalyzerPage = lazy(() => import('./pages/SkillAnalyzerPage.jsx'));
-const GapAnalysisPage = lazy(() => import('./pages/GapAnalysisPage.jsx'));
-const TrajectoryPage = lazy(() => import('./pages/TrajectoryPage.jsx'));
+const SkillAssessmentPage = lazy(() => import('./pages/SkillAssessmentPage.jsx'));
 const ImprovementMapPage = lazy(() => import('./pages/ImprovementMapPage.jsx'));
 const CodeLabsPage = lazy(() => import('./pages/CodeLabsPage.jsx'));
 const VideoHubPage = lazy(() => import('./pages/VideoHubPage.jsx'));
@@ -62,9 +60,10 @@ export default function App() {
             </ProtectedRoute>
           }>
             <Route index element={<DashboardPage />} />
-            <Route path="analyzer" element={<SkillAnalyzerPage />} />
-            <Route path="gap-analysis" element={<GapAnalysisPage />} />
-            <Route path="trajectory" element={<TrajectoryPage />} />
+            <Route path="assessment" element={<SkillAssessmentPage />} />
+            <Route path="analyzer" element={<Navigate to="/assessment?stage=analyze" replace />} />
+            <Route path="gap-analysis" element={<Navigate to="/assessment?stage=gap" replace />} />
+            <Route path="trajectory" element={<Navigate to="/assessment?stage=trajectory" replace />} />
             <Route path="improvement-map" element={<ImprovementMapPage />} />
             <Route path="code-labs" element={<CodeLabsPage />} />
             <Route path="videos" element={<VideoHubPage />} />

@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import useStore from '../../store/useStore.js';
 import TopNavbar from './TopNavbar.jsx';
-import BottomRightDock from './BottomRightDock.jsx';
 import ToastContainer from '../ui/ToastContainer.jsx';
 import AIAssistant from '../ui/AIAssistant.jsx';
 
@@ -20,8 +19,6 @@ export default function AppLayout() {
         </div>
       </main>
 
-      {/* Floating Bottom-Right Settings Dock */}
-      <BottomRightDock />
 
       {/* Bottom-Right AI Career Assistant */}
       <AIAssistant />

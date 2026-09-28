@@ -1,95 +1,127 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart2, TrendingUp, AlertTriangle, Users, ArrowRight,
-  Newspaper, Lightbulb, Star, Trophy, Zap, BookOpen
+  Newspaper, Lightbulb, Star, Trophy, Zap, BookOpen,
+  CheckCircle2, Compass, Sparkles, ChevronDown, ChevronUp
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
+
 import useStore from '../store/useStore.js';
 import { PEER_PROFILES, TREND_DATA, STATIC_NEWS_FALLBACK, VIDEO_LIBRARY, SKILL_ROLES } from '../lib/data.js';
 import { computeReadiness, rankVideosForGaps } from '../lib/storage.js';
 import { apiUrl } from '../lib/api.js';
 import CuratedLearningAndNewsFeed from '../components/ui/CuratedLearningAndNewsFeed.jsx';
 
-// ─── Animated KPI Card ────────────────────────────────────────────────────────
-function KPICard({ value, suffix, label, trend, trendUp, colorClass }) {
-  const [displayed, setDisplayed] = useState(0);
-  const animRef = useRef(null);
-  useEffect(() => {
-    let start = null;
-    const target = value;
-    const duration = 1200;
-    const step = (ts) => {
-      if (!start) start = ts;
-      const prog = Math.min((ts - start) / duration, 1);
-      setDisplayed(Math.round(prog * target));
-      if (prog < 1) animRef.current = requestAnimationFrame(step);
-    };
-    animRef.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animRef.current);
-  }, [value]);
-
+// ─── Compact KPI Card ────────────────────────────────────────────────────────
+function ConsolidatedKPICard({ title, value, subtitle, badge, badgeColor, icon: Icon, onClick, ctaText }) {
   return (
-    <div className={`kpi-card ${colorClass}`}>
-      <div className="kpi-value">{displayed}{suffix}</div>
-      <div className="kpi-label">{label}</div>
-      <div className={`kpi-trend ${trendUp ? 'kpi-up' : 'kpi-down'}`}>{trend}</div>
+    <div
+      className="card kpi-consolidated-card"
+      onClick={onClick}
+      style={{
+        cursor: onClick ? 'pointer' : 'default',
+        padding: '16px 18px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'all 0.2s ease',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>
+          {title}
+        </span>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: 'var(--bg-subtle, rgba(255,255,255,0.06))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--brand)',
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={16} />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+        <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', fontFamily: 'var(--font-display, inherit)' }}>
+          {value}
+        </span>
+        {badge && (
+          <span
+            className="badge"
+            style={{
+              background: badgeColor ? `${badgeColor}18` : 'rgba(59,130,246,0.15)',
+              color: badgeColor || 'var(--brand-light)',
+              fontSize: 10,
+              fontWeight: 700,
+              padding: '2px 7px',
+            }}
+          >
+            {badge}
+          </span>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
+          {subtitle}
+        </span>
+        {ctaText && (
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 2 }}>
+            {ctaText} →
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
-
-// ─── News Panel ───────────────────────────────────────────────────────────────
-function NewsPanel() {
-  const [news, setNews] = useState(STATIC_NEWS_FALLBACK);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const today = new Date().toDateString();
-    const cached = localStorage.getItem('sb_daily_news');
-    if (cached) {
-      try {
-        const { date, items } = JSON.parse(cached);
-        if (date === today) { setNews(items); return; }
-      } catch {}
-    }
-    setLoading(true);
-    fetch(apiUrl('/api/news'))
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data?.items?.length) {
-          setNews(data.items);
-          localStorage.setItem('sb_daily_news', JSON.stringify({ date: today, items: data.items }));
-        }
-      })
-      .catch(() => {}) // silently fall back to static
-      .finally(() => setLoading(false));
-  }, []);
+// ─── Compact Auto-Scrolling Market Pulse Ticker ─────────────────────────────
+function CompactMarketTicker() {
+  const navigate = useNavigate();
+  const TICKER = [
+    'LinkedIn Hiring Index: 142,850+ Open Roles (+14.2% MoM)',
+    'Top Rising Skills: LangChain, PyTorch & MLOps (+312% YoY)',
+    'Median GenAI Salary: ₹28.5L–₹45L LPA',
+    'MLOps Engineer Velocity: Up 28% YoY',
+    'Python: #1 Most Demanded Language for 12 Consecutive Years',
+    'Cloud AI Demand: +110.8% MoM Surge in Bengaluru',
+  ];
 
   return (
-    <div>
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 40 }} />)}
+    <div className="compact-market-pulse-bar" style={{ marginBottom: 18 }}>
+      <div className="pulse-tag">
+        <span className="pulse-ping" />
+        <span>Market Pulse</span>
+      </div>
+      <div className="pulse-track-window">
+        <div className="pulse-track-slider">
+          {[...TICKER, ...TICKER].map((t, i) => (
+            <span key={i} className="pulse-item">
+              {t}
+              <span className="pulse-sep">·</span>
+            </span>
+          ))}
         </div>
-      ) : (
-        news.slice(0, 5).map((item, i) => (
-          <div key={i} className="news-item">
-            <div className="news-dot" />
-            <div>
-              <div className="news-title" onClick={() => window.open(item.url || '#', '_blank')}>
-                {item.title}
-              </div>
-              <div className="news-meta">
-                <span className="badge badge-brand" style={{ fontSize: 9, marginRight: 6 }}>{item.tag}</span>
-                {item.date}
-              </div>
-            </div>
-          </div>
-        ))
-      )}
+      </div>
+      <button
+        type="button"
+        className="pulse-action-link"
+        onClick={() => navigate('/jobs')}
+      >
+        Jobs →
+      </button>
     </div>
   );
 }
@@ -107,14 +139,14 @@ function PeerBenchmarks() {
         const col = p.score >= 80 ? 'var(--success)' : p.score >= 65 ? 'var(--warning)' : 'var(--info)';
         return (
           <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 6, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
               {p.name.charAt(0)}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{p.name}</div>
               <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{p.currentRole}</div>
             </div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: col }}>{p.score}%</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: col, fontFamily: 'var(--font-display)' }}>{p.score}%</div>
           </div>
         );
       })}
@@ -136,7 +168,7 @@ function TrendChart() {
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
         <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} />
-        <YAxis tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} />
+        <YAxis tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} unit="%" />
         <Tooltip
           contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12 }}
           labelStyle={{ color: 'var(--text)' }}
@@ -149,53 +181,7 @@ function TrendChart() {
   );
 }
 
-// ─── Recommended Videos Row ──────────────────────────────────────────────────
-function RecommendedVideos({ gapSkills }) {
-  const ranked = rankVideosForGaps(VIDEO_LIBRARY, gapSkills).slice(0, 3);
-  const navigate = useNavigate();
-  return (
-    <div className="recommended-videos-grid">
-      {ranked.map(v => (
-        <div key={v.id} className="card" style={{ padding: 12, cursor: 'pointer' }} onClick={() => window.open(v.url, '_blank')}>
-          <div style={{ height: 60, borderRadius: 6, background: v.thumbnail, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 8, fontFamily: 'Outfit' }}>
-            {v.channel.charAt(0)}
-          </div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', lineHeight: 1.3, marginBottom: 4 }}>{v.title.slice(0, 45)}...</div>
-          <div style={{ fontSize: 10, color: 'var(--text-subtle)' }}>{v.channel} · {v.duration}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Project Suggestion ──────────────────────────────────────────────────────
-function ProjectSuggestion({ gapResults }) {
-  if (!gapResults) return null;
-  const topGaps = gapResults.gaps?.slice(0, 3) || [];
-  if (topGaps.length === 0) return null;
-  return (
-    <div className="card" style={{ background: 'rgba(37,99,235,0.08)', borderColor: 'rgba(37,99,235,0.2)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <Lightbulb size={16} color="var(--brand-light)" />
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Closes the Most Gaps: Suggested Project</span>
-        <span className="badge badge-brand">AI Pick</span>
-      </div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
-        {topGaps.includes('MLOps') || topGaps.includes('Docker')
-          ? 'End-to-End ML API with Docker & CI/CD'
-          : topGaps.includes('PyTorch') || topGaps.includes('Deep Learning')
-          ? 'Custom Neural Network from Scratch in PyTorch'
-          : 'Predictive Analytics Dashboard with Scikit-learn & SQL'}
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-        This project directly demonstrates your top gap skills: <strong style={{ color: 'var(--brand-light)' }}>{topGaps.join(', ')}</strong>. 
-        Building and deploying it covers more of your missing competencies than any other single project.
-      </div>
-    </div>
-  );
-}
-
-// ─── Dashboard Page ───────────────────────────────────────────────────────────
+// ─── Main Dashboard Page ─────────────────────────────────────────────────────
 export default function DashboardPage() {
   const navigate = useNavigate();
   const user = useStore(s => s.user);
@@ -203,210 +189,335 @@ export default function DashboardPage() {
   const xp = useStore(s => s.xp);
   const streak = useStore(s => s.streak);
   const solvedProblems = useStore(s => s.solvedProblems);
+  const targetRole = useStore(s => s.targetRole) || 'ml-engineer';
+
+  const [insightsOpen, setInsightsOpen] = useState(false);
 
   const isDemo = user?.email === 'user@skillbridge.io';
   const hasAnalysis = Boolean(gapResults);
   const gapSkills = gapResults?.gaps || (isDemo ? ['MLOps', 'PyTorch', 'Docker', 'Kubernetes'] : []);
   const readiness = gapResults?.readiness !== undefined ? gapResults.readiness : isDemo ? 67 : 0;
-
-  // Ticker items
-  const TICKER = [
-    'LinkedIn Hiring Index: 142,850+ Open Roles  +14.2% MoM',
-    'Stack Overflow Top Rising: LangChain & PyTorch  +312% YoY',
-    'Median GenAI Salary: ₹28.5L–₹45L LPA',
-    'MLOps Engineer Salary Up 28% YoY',
-    'Python: #1 Most Used Language 12 Years Running',
-    'GenAI Demand: +110.8% MoM Velocity in Bengaluru',
-  ];
+  const targetRoleObj = SKILL_ROLES[targetRole] || SKILL_ROLES['ml-engineer'];
 
   return (
-    <div>
-      {/* Page header */}
-      <div className="page-header">
+    <div className="dashboard-page-container">
+      {/* ─── Hero Header ──────────────────────────────────────────────────────── */}
+      <div className="page-header" style={{ marginBottom: 14 }}>
         <div>
-          <h1 className="page-title">
-            Welcome back, {user?.name || 'User'} 👋
+          <h1 className="page-title" style={{ margin: 0 }}>
+            Welcome back, {user?.name || 'Developer'} 👋
           </h1>
-          <p className="page-subtitle">
-            AI Skill Gap Platform · Interactive Labs · Learning Roadmaps · Daily Challenges
+          <p className="page-subtitle" style={{ margin: '4px 0 0 0' }}>
+            Target Role: <strong style={{ color: 'var(--text)' }}>{targetRoleObj.name}</strong> · AI Skill Diagnostic & Learning Roadmap
           </p>
         </div>
         <div className="header-actions">
-          <button className="btn btn-secondary" onClick={() => navigate('/analyzer')}>Analyze Resume</button>
-          <button className="btn btn-primary" onClick={() => navigate('/gap-analysis')}>Run Gap Analysis</button>
-        </div>
-      </div>
-
-      {/* Market Pulse Ticker */}
-      <div className="market-ticker" style={{ marginBottom: 20 }}>
-        <div className="ticker-badge">LIVE MARKET PULSE</div>
-        <div style={{ overflow: 'hidden', flex: 1 }}>
-          <div className="ticker-scroll">
-            {[...TICKER, ...TICKER].map((t, i) => (
-              <span key={i} className="ticker-item">{t}</span>
-            ))}
-          </div>
-        </div>
-        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/jobs')}>Explore Jobs →</button>
-      </div>
-
-      {/* Onboarding Welcome Banner for newly registered users */}
-      {!hasAnalysis && !isDemo && (
-        <div className="card" style={{ marginBottom: 20, background: 'linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.08))', borderColor: 'rgba(59,130,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', gap: 16 }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>
-              🎯 Welcome to SkillBridge, {user?.name || 'Developer'}!
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              Your profile is live on PostgreSQL. Run your first diagnostic to analyze your current skills against target tech roles and unlock your custom learning path.
-            </div>
-          </div>
-          <button className="btn btn-primary" onClick={() => navigate('/gap-analysis')} style={{ whiteSpace: 'nowrap' }}>
-            Start Diagnostic →
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/assessment?stage=analyze')}
+          >
+            Analyze Resume
           </button>
-        </div>
-      )}
-
-      {/* KPI Grid */}
-      <div className="kpi-grid">
-        <KPICard value={500} suffix="+" label="Platform Learners" trend="+12% active this month" trendUp colorClass="kpi-primary" />
-        <KPICard value={readiness} suffix="%" label="AI Readiness" trend={hasAnalysis ? 'Based on your diagnostic' : 'Diagnose skills to score'} trendUp={hasAnalysis} colorClass="kpi-success" />
-        <KPICard value={gapSkills.length} suffix="" label="Identified Gaps" trend={gapSkills.length > 0 ? `${gapSkills.length} skills to master` : '0 pending'} trendUp={false} colorClass="kpi-warning" />
-        <KPICard value={xp} suffix=" XP" label="Earned Experience" trend={`${streak}-day streak`} trendUp colorClass="kpi-info" />
-      </div>
-
-      {/* XP / Streak Row */}
-      <div className="dashboard-stats-row">
-        <div className="card" style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Trophy size={22} color="var(--warning)" />
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)', fontFamily: 'Outfit' }}>{xp} XP</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Total experience points</div>
-          </div>
-        </div>
-        <div className="card" style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Zap size={22} color="#F59E0B" />
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)', fontFamily: 'Outfit' }}>{streak} days</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Current streak</div>
-          </div>
-          {streak >= 3 && <span className="badge badge-warning" style={{ marginLeft: 'auto' }}>On Fire!</span>}
-        </div>
-        <div className="card" style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <BookOpen size={22} color="var(--success)" />
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)', fontFamily: 'Outfit' }}>{solvedProblems.length}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Problems solved</div>
-          </div>
-          <button className="btn btn-sm btn-success" style={{ marginLeft: 'auto' }} onClick={() => navigate('/daily-problem')}>
-            Today's Problem
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/assessment?stage=gap')}
+          >
+            Skill Assessment →
           </button>
         </div>
       </div>
 
-      {/* Main dashboard grid */}
+      {/* ─── Compact Live Market Pulse Ticker ──────────────────────────────────── */}
+      <CompactMarketTicker />
+
+      {/* ─── Single Consolidated Row of Key Metrics (Zero Duplication) ───────── */}
+      <div className="kpi-consolidated-grid" style={{ marginBottom: 20 }}>
+        {/* 1. AI Readiness */}
+        <ConsolidatedKPICard
+          title="AI Role Readiness"
+          value={`${readiness}%`}
+          subtitle={hasAnalysis ? `Benchmarked to ${targetRoleObj.name}` : 'Click to run initial diagnostic'}
+          badge={readiness >= 75 ? 'Strong Fit' : readiness >= 50 ? 'Good Fit' : 'Diagnose'}
+          badgeColor={readiness >= 75 ? 'var(--success)' : readiness >= 50 ? 'var(--warning)' : 'var(--danger)'}
+          icon={Compass}
+          onClick={() => navigate('/assessment?stage=gap')}
+          ctaText="View Gap Report"
+        />
+
+        {/* 2. Identified Skill Gaps */}
+        <ConsolidatedKPICard
+          title="Identified Skill Gaps"
+          value={gapSkills.length}
+          subtitle={gapSkills.length > 0 ? `${gapSkills.slice(0, 2).join(', ')}...` : 'All role skills mastered'}
+          badge={gapSkills.length > 0 ? `${gapSkills.length} to master` : 'Clean'}
+          badgeColor={gapSkills.length > 0 ? 'var(--danger)' : 'var(--success)'}
+          icon={AlertTriangle}
+          onClick={() => navigate('/assessment?stage=gap')}
+          ctaText="Review Gaps"
+        />
+
+        {/* 3. XP & Streak Gamification (Consolidated) */}
+        <ConsolidatedKPICard
+          title="Experience & Streak"
+          value={`${xp} XP`}
+          subtitle={`${streak}-day active practice streak`}
+          badge={streak >= 3 ? `🔥 ${streak}d On Fire` : `⚡ ${streak}d Streak`}
+          badgeColor="var(--warning)"
+          icon={Trophy}
+          onClick={() => navigate('/daily-problem')}
+          ctaText="+10 XP Today"
+        />
+
+        {/* 4. Problem & Lab Mastery */}
+        <ConsolidatedKPICard
+          title="Coding Drills Solved"
+          value={solvedProblems.length}
+          subtitle="Daily challenges & interactive lab exercises"
+          badge="Interactive"
+          badgeColor="var(--brand)"
+          icon={BookOpen}
+          onClick={() => navigate('/daily-problem')}
+          ctaText="Solve Next"
+        />
+      </div>
+
+      {/* ─── Main Content Grid: YouTube Feeds & Actionable Insights ──────────── */}
       <div className="dashboard-grid" style={{ marginBottom: 20 }}>
         {/* Curated YouTube Learning Masterclasses & Tech News with Image Support */}
         <CuratedLearningAndNewsFeed />
 
-        {/* Top Critical Gaps */}
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Top Critical Gaps</h2>
-            <span className={`badge ${gapSkills.length > 0 ? 'badge-danger' : 'badge-success'}`}>
-              {gapSkills.length > 0 ? 'Needs Action' : 'All Clear'}
+        {/* Right Column: Top Critical Gaps Quick Action */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div className="card-header" style={{ paddingBottom: 10 }}>
+              <h2 className="card-title">Top Priority Gaps</h2>
+              <span className={`badge ${gapSkills.length > 0 ? 'badge-danger' : 'badge-success'}`}>
+                {gapSkills.length > 0 ? `${gapSkills.length} Action Items` : 'All Clear'}
+              </span>
+            </div>
+
+            {gapSkills.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {gapSkills.slice(0, 4).map((gap, i) => (
+                  <div key={gap}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{gap}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: i < 2 ? 'var(--danger)' : 'var(--warning)' }}>
+                        {i < 2 ? 'Critical Gap' : 'Medium Gap'}
+                      </span>
+                    </div>
+                    <div className="progress-track" style={{ height: 6 }}>
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${Math.max(25, 65 - i * 12)}%`,
+                          background: i < 2 ? 'var(--danger)' : 'var(--warning)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: '24px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
+                  No critical gaps identified yet. Diagnose your skills or upload a resume in the Assessment tab.
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <button
+              className="btn btn-primary btn-full btn-sm"
+              onClick={() => navigate('/assessment?stage=gap')}
+            >
+              Open Full Assessment & Chart <ArrowRight size={13} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Progressive Disclosure: Secondary Insights Accordion ────────────── */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div
+          onClick={() => setInsightsOpen(!insightsOpen)}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            cursor: 'pointer',
+            padding: '4px 0',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <TrendingUp size={16} color="var(--brand)" />
+            <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>
+              Secondary Market Insights & Peer Benchmarks
+            </h3>
+            <span className="badge badge-info" style={{ fontSize: 10 }}>
+              {insightsOpen ? 'Click to collapse' : 'Click to expand'}
             </span>
           </div>
-          {gapSkills.length > 0 ? (
-            gapSkills.slice(0, 5).map((gap, i) => (
-              <div key={gap} style={{ marginBottom: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{gap}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--danger)' }}>Critical Gap</span>
-                </div>
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${Math.max(20, 55 - i * 7)}%`, background: 'var(--danger)' }} />
-                </div>
-              </div>
-            ))
-          ) : (
-            <div style={{ padding: '24px 12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
-                No critical gaps identified yet. Diagnose your skills or upload a resume to populate your gaps matrix.
-              </div>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate('/gap-analysis')}>
-                Diagnose Skills <ArrowRight size={12} />
-              </button>
-            </div>
-          )}
-          {gapSkills.length > 0 && (
-            <button className="btn btn-secondary btn-sm" style={{ marginTop: 8 }} onClick={() => navigate('/gap-analysis')}>
-              Run Full Analysis <ArrowRight size={12} />
-            </button>
-          )}
-        </div>
-
-        {/* Peer Benchmarks */}
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Peer Learners & Benchmarks</h2>
-            <button className="btn-link" onClick={() => navigate('/jobs')}>View All →</button>
-          </div>
-          <PeerBenchmarks />
-        </div>
-      </div>
-
-      {/* Trend Chart */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div className="card-header">
-          <h2 className="card-title">Emerging Skill Demand (AI/ML — 2022–2024)</h2>
-          <span className="badge badge-info">Illustrative Data</span>
-        </div>
-        <TrendChart />
-      </div>
-
-      {/* Daily News + Recommended Videos */}
-      <div className="dashboard-bottom-grid">
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title"><Newspaper size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />Daily Skill News</h2>
-            <span className="badge badge-success">Daily</span>
-          </div>
-          <NewsPanel />
-        </div>
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Recommended for You</h2>
-            <span className="badge badge-brand">Gap-Ranked</span>
-          </div>
-          <RecommendedVideos gapSkills={gapSkills} />
-          <button className="btn btn-secondary btn-sm" style={{ marginTop: 10 }} onClick={() => navigate('/videos')}>
-            All Videos →
+          <button
+            type="button"
+            className="btn-chip"
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}
+          >
+            {insightsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            <span>{insightsOpen ? 'Hide' : 'Show Details'}</span>
           </button>
         </div>
-      </div>
 
-      {/* Project Suggestion */}
-      <ProjectSuggestion gapResults={gapResults} />
-
-      {/* Pipeline Overview */}
-      <div className="card" style={{ marginTop: 16 }}>
-        <div className="card-header">
-          <h2 className="card-title">8-Stage AI Pipeline</h2>
-          <span className="badge badge-success">Active</span>
-        </div>
-        <div className="pipeline-stages">
-          {['Problem', 'Collect Data', 'Clean Data', 'Analyze', 'Build AI', 'Insight', 'Product', 'Impact'].map((stage, i) => (
-            <div key={stage} style={{ display: 'flex', alignItems: 'center' }}>
-              <div className={`pipeline-stage ${i < 4 ? 'completed' : i === 4 ? 'active-stage' : ''}`}>
-                <div className="stage-dot" />
-                <span>{stage}</span>
+        {insightsOpen && (
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+            <div className="responsive-two-col-grid" style={{ marginBottom: 16 }}>
+              {/* Emerging Demand Trend Chart */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
+                    Emerging Skill Demand (AI/ML)
+                  </span>
+                  <span style={{ fontSize: 10, color: 'var(--text-subtle)' }}>Multi-year trajectory</span>
+                </div>
+                <TrendChart />
               </div>
-              {i < 7 && <div className={`pipeline-connector ${i < 4 ? 'completed' : ''}`} />}
+
+              {/* Peer Learner Benchmarks */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
+                    Peer Learners in {targetRoleObj.name}
+                  </span>
+                  <button
+                    className="btn-link"
+                    style={{ fontSize: 11 }}
+                    onClick={() => navigate('/jobs')}
+                  >
+                    Explore Job Market →
+                  </button>
+                </div>
+                <PeerBenchmarks />
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* 8-Stage AI Engineering Pipeline */}
+            <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>
+                Industry 8-Stage AI Pipeline Progression
+              </div>
+              <div className="pipeline-stages">
+                {['Problem', 'Collect Data', 'Clean Data', 'Analyze', 'Build AI', 'Insight', 'Product', 'Impact'].map((stage, i) => (
+                  <div key={stage} style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className={`pipeline-stage ${i < 4 ? 'completed' : i === 4 ? 'active-stage' : ''}`}>
+                      <div className="stage-dot" />
+                      <span>{stage}</span>
+                    </div>
+                    {i < 7 && <div className={`pipeline-connector ${i < 4 ? 'completed' : ''}`} />}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      <style>{`
+        .kpi-consolidated-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 14px;
+        }
+        @media (max-width: 1024px) {
+          .kpi-consolidated-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 600px) {
+          .kpi-consolidated-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .kpi-consolidated-card:hover {
+          border-color: var(--brand);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .compact-market-pulse-bar {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          height: 36px;
+          background: var(--bg-surface);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 0 12px;
+          overflow: hidden;
+        }
+        .pulse-tag {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--brand);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          white-space: nowrap;
+          padding-right: 8px;
+          border-right: 1px solid var(--border);
+        }
+        .pulse-ping {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #10B981;
+          box-shadow: 0 0 6px #10B981;
+        }
+        .pulse-track-window {
+          flex: 1;
+          overflow: hidden;
+          white-space: nowrap;
+          position: relative;
+        }
+        .pulse-track-slider {
+          display: inline-block;
+          white-space: nowrap;
+          animation: tickerScroll 42s linear infinite;
+        }
+        .pulse-track-slider:hover {
+          animation-play-state: paused;
+        }
+        .pulse-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 11.5px;
+          color: var(--text-muted);
+        }
+        .pulse-sep {
+          color: var(--text-subtle);
+          font-weight: bold;
+        }
+        .pulse-action-link {
+          background: transparent;
+          border: none;
+          color: var(--brand);
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+          padding-left: 8px;
+        }
+        .pulse-action-link:hover {
+          text-decoration: underline;
+        }
+        @keyframes tickerScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 }
