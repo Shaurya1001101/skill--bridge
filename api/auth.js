@@ -113,9 +113,9 @@ export default async function handler(req, res) {
         return res.status(200).json({
           user: { id: u.id, username: u.username, name: u.name, email: u.email, role: u.role || 'User' },
           profile: {
-            xp: p?.xp || 50,
+            xp: p?.xp ?? 0,
             streak: p?.streak || 1,
-            targetRole: p?.target_role || 'data-scientist',
+            targetRole: p?.target_role || 'ml-engineer',
             skills: p?.skills_json || { all: [] },
           },
           committedPath: cp ? {
@@ -143,10 +143,10 @@ export default async function handler(req, res) {
       role: 'User',
     },
     profile: {
-      xp: 25,
+      xp: 0,
       streak: 1,
-      targetRole: 'data-scientist',
-      skills: { all: ['Python', 'SQL'] },
+      targetRole: 'ml-engineer',
+      skills: { all: [] },
     },
     committedPath: null,
     token: `sb-token-${Date.now()}`,

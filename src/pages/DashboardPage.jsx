@@ -189,10 +189,11 @@ export default function DashboardPage() {
   const [showAddTask, setShowAddTask] = useState(false);
 
   // Interactive Daily Practice Plan
+  // Interactive Daily Practice Plan (starts 0 done for new users)
   const [dailyTasks, setDailyTasks] = useState([
-    { id: 1, text: 'Solve Daily Problem: Reverse Linked List II', xp: 20, done: false, link: '/daily-problem' },
-    { id: 2, text: 'Run MLOps Docker Containerization Lab', xp: 15, done: false, link: '/code-labs' },
-    { id: 3, text: 'Review SQL Window Functions Cheat Sheet', xp: 10, done: true, link: '/code-labs' },
+    { id: 1, text: 'Establish baseline skills via Skill Assessment', xp: 25, done: false, link: '/skill-assessment' },
+    { id: 2, text: 'Complete Daily Coding Challenge: Highest Earner SQL', xp: 20, done: false, link: '/daily-problem' },
+    { id: 3, text: 'Explore Code Labs sandbox environment', xp: 15, done: false, link: '/code-labs' },
   ]);
 
   const countdown = useCountdownToMidnight();
@@ -202,53 +203,89 @@ export default function DashboardPage() {
     return () => clearTimeout(t);
   }, []);
 
-  const isDemo = user?.email === 'user@skillbridge.io';
+  const isDemo = (user?.email === 'user@skillbridge.io' || user?.email === 'alex@skillbridge.io') && (user?.id === 1 || user?.id === '1') && Boolean(userSkills?.all?.length > 0 || gapResults);
   const targetRoleObj = SKILL_ROLES[targetRole] || SKILL_ROLES['ml-engineer'];
-  const gapSkills = gapResults?.gaps || (isDemo ? ['Docker', 'PyTorch', 'MLOps', 'Kubernetes'] : ['Docker', 'Kubernetes']);
+  const hasUserSkills = Boolean((userSkills?.all && userSkills.all.length > 0) || gapResults);
 
-  // FIX: Safely normalize skills from targetRoleObj.skills (can be array of objects or strings)
+  // Safely normalize skills from targetRoleObj.skills
   const allRoleSkills = (targetRoleObj.skills || []).map(s => {
     if (typeof s === 'string') return { name: s, weight: 0.15, required: 3 };
     return { name: s.name, weight: s.weight ?? 0.15, required: s.required ?? 3 };
   });
 
-  // Build matrix list where item.skill is STRICTLY guaranteed to be a string name
+  const userSkillList = (userSkills?.all || []).map(s => String(s).toLowerCase());
+
+  // Determine gap skills: For new users, all target role skills need assessment
+  const gapSkills = gapResults?.gaps || (
+    isDemo
+      ? ['Docker', 'PyTorch', 'MLOps', 'Kubernetes']
+      : hasUserSkills
+        ? allRoleSkills.map(s => s.name).filter(name => !userSkillList.includes(name.toLowerCase()))
+        : allRoleSkills.map(s => s.name)
+  );
+
+  // Build matrix list: For brand new user / guest (hasUserSkills is false), START AT 0%
   const matrixList = allRoleSkills.map(skObj => {
     const skillName = skObj.name;
-    const isGap = gapSkills.includes(skillName);
-    let evidence = isGap ? 'Claimed' : 'Tested';
-    let weight = skObj.weight >= 0.15 ? 'Core' : skObj.weight >= 0.10 ? 'High' : 'Medium';
-    let pct = isGap ? 25 : 100;
+    const weight = skObj.weight >= 0.15 ? 'Core' : skObj.weight >= 0.10 ? 'High' : 'Medium';
 
-    if (skillName === 'Docker' || skillName === 'PyTorch') {
-      evidence = 'Claimed';
-      pct = 25;
-    } else if (skillName === 'MLOps' || skillName === 'Kubernetes') {
-      evidence = 'Quizzed';
-      pct = 60;
-    } else if (skillName === 'Python' || skillName === 'SQL' || skillName === 'Git') {
-      evidence = 'Tested';
-      pct = 100;
+    if (!hasUserSkills && !isDemo) {
+      return {
+        skill: skillName,
+        isGap: true,
+        evidence: 'Unassessed',
+        weight,
+        pct: 0, // Starts strictly at 0% for new users & guest!
+        required: skObj.required,
+      };
     }
 
+    if (isDemo) {
+      let evidence = 'Claimed';
+      let pct = 25;
+      if (skillName === 'Docker' || skillName === 'PyTorch') {
+        evidence = 'Claimed';
+        pct = 25;
+      } else if (skillName === 'MLOps' || skillName === 'Kubernetes') {
+        evidence = 'Quizzed';
+        pct = 60;
+      } else if (skillName === 'Python' || skillName === 'SQL' || skillName === 'Git') {
+        evidence = 'Tested';
+        pct = 100;
+      }
+      return {
+        skill: skillName,
+        isGap: gapSkills.includes(skillName),
+        evidence,
+        weight,
+        pct,
+        required: skObj.required,
+      };
+    }
+
+    // Authenticated user with real assessed skills
+    const isMastered = userSkillList.includes(skillName.toLowerCase());
     return {
-      skill: skillName, // Strictly string
-      isGap,
-      evidence,
+      skill: skillName,
+      isGap: !isMastered,
+      evidence: isMastered ? 'Tested' : 'Gap',
       weight,
-      pct,
-      required: skObj.required
+      pct: isMastered ? 100 : 0,
+      required: skObj.required,
     };
   });
 
   const filteredMatrix = matrixList.filter(item => {
     if (matrixFilter === 'gaps') return item.isGap;
     if (matrixFilter === 'ready') return !item.isGap;
-    return true; // 'all' filter shows all items without crashing
+    return true;
   });
 
-  const topGap = gapSkills[0] || 'Docker';
-  const phases = ROLE_CURRICULA[targetRole] || ROLE_CURRICULA['ml-engineer'];
+  const topGap = gapSkills[0] || allRoleSkills[0]?.name || 'Assessment';
+  const rawPhases = ROLE_CURRICULA[targetRole] || ROLE_CURRICULA['ml-engineer'];
+  const phases = (!hasUserSkills && !isDemo)
+    ? rawPhases.map((p, idx) => ({ ...p, status: idx === 0 ? 'in-progress' : 'upcoming' }))
+    : rawPhases;
 
   // Dynamic time-of-day greeting
   const getGreeting = () => {
@@ -378,7 +415,7 @@ export default function DashboardPage() {
               Close your top shortfall: <span className="sb-spotlight-target-highlight">{topGap}</span>
             </h2>
             <p className="sb-spotlight-desc">
-              Your target role requires verified proficiency in <strong>{topGap}</strong>. Your current evidence is <span style={{ color: 'var(--warning)', fontWeight: 600 }}>Claimed (0.25)</span>. Completing interactive lab exercises in the browser upgrades your evidence to <span style={{ color: 'var(--success)', fontWeight: 600 }}>Tested (1.00)</span> and proves production readiness.
+              Your target role requires verified proficiency in <strong>{topGap}</strong>. Your current evidence is <span style={{ color: isDemo ? 'var(--warning)' : 'var(--danger)', fontWeight: 600 }}>{isDemo ? 'Claimed (0.25)' : 'Unassessed (0.00)'}</span>. Completing interactive lab exercises in the browser upgrades your evidence to <span style={{ color: 'var(--success)', fontWeight: 600 }}>Tested (1.00)</span> and proves production readiness.
             </p>
 
             <div className="sb-spotlight-actions">
@@ -409,11 +446,13 @@ export default function DashboardPage() {
             </div>
 
             <div className="sb-evidence-ladder">
-              <span className="sb-ladder-step">Claimed 0.25</span>
+              <span className={`sb-ladder-step ${!isDemo ? 'active' : ''}`}>Unassessed 0.00</span>
+              <span className="sb-ladder-arrow">→</span>
+              <span className={`sb-ladder-step ${isDemo ? 'active' : ''}`}>Claimed 0.25</span>
               <span className="sb-ladder-arrow">→</span>
               <span className="sb-ladder-step">Quizzed 0.60</span>
               <span className="sb-ladder-arrow">→</span>
-              <span className="sb-ladder-step active">Tested 1.00</span>
+              <span className="sb-ladder-step">Tested 1.00</span>
             </div>
           </div>
         </div>
@@ -421,7 +460,7 @@ export default function DashboardPage() {
 
       {/* ─── 3. 4 Metric KPI Cards (Readiness Card Replaced with Roadmap Phase) ─── */}
       <div className="sb-kpi-grid">
-        {/* Card 1: Replaced Verified Readiness with Active Roadmap Phase */}
+        {/* Card 1: Active Roadmap Phase */}
         <div className="sb-kpi-card" onClick={() => navigate('/improvement-map')}>
           <div className="sb-kpi-top">
             <span className="sb-kpi-label">Roadmap Milestone</span>
@@ -430,10 +469,10 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="sb-kpi-val" style={{ color: 'var(--brand-light)' }}>
-            Phase 2 of 4
+            {isDemo ? 'Phase 2 of 4' : 'Phase 1 of 4'}
           </div>
           <span className="sb-kpi-hint">
-            In Progress · 4 of 12 Weeks
+            {isDemo ? 'In Progress · 4 of 12 Weeks' : 'Getting Started · Week 1 of 12'}
           </span>
         </div>
 
@@ -542,7 +581,9 @@ export default function DashboardPage() {
                         ? '✓ Tested (1.00)'
                         : item.evidence === 'Quizzed'
                           ? 'Quizzed (0.60)'
-                          : 'Claimed (0.25)'}
+                          : item.evidence === 'Claimed'
+                            ? 'Claimed (0.25)'
+                            : 'Unassessed (0.00)'}
                     </span>
                   </div>
 

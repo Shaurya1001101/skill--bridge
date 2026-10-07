@@ -1,45 +1,50 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   ExternalLink, Filter, TrendingUp, Sparkles, Check, Briefcase,
-  DollarSign, Search, Database, Layers, CheckCircle2, ArrowUpDown
+  DollarSign, Search, Database, Layers, CheckCircle2, ArrowUpDown,
+  BookOpen, Award, Compass, BarChart3, MapPin, Building, ChevronRight, XCircle
 } from 'lucide-react';
-import useStore from '../store/useStore.js';
 import {
-  MARKET_JOBS, SALARY_BANDS, DATASETS, SKILL_ROLES, ROLE_CATEGORIES
-} from '../lib/data.js';
-import { computeJobMatch } from '../lib/storage.js';
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell
+} from 'recharts';
+
+import useStore from '../store/useStore.js';
+import { SKILL_ROLES, ROLE_CATEGORIES } from '../lib/data.js';
 import { apiUrl, apiFetch } from '../lib/api.js';
+import {
+  recommendJobs,
+  searchJobs,
+  getMarketInsights,
+  getCourseRecommendations,
+  extractSkills
+} from '../lib/aiEngine.js';
 
 export default function JobMarketPage() {
   const gapResults = useStore(s => s.gapResults);
-  const analyzerExtracted = useStore(s => s.analyzerExtracted);
+  const userSkills = useStore(s => s.userSkills);
   const targetRole = useStore(s => s.targetRole) || 'ml-engineer';
   const setTargetRole = useStore(s => s.setTargetRole);
 
-  const [activeTab, setActiveTab] = useState('p1');
-  const [sortMode, setSortMode] = useState('match'); // 'match' | 'salary' | 'recent'
+  // Active view: 'jobs' | 'analysis' | 'courses'
+  const [activeTab, setActiveTab] = useState('jobs');
+  const [sortMode, setSortMode] = useState('match'); // 'match' | 'recent'
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [selectedRoleFilter, setSelectedRoleFilter] = useState('all');
+  const [selectedCity, setSelectedCity] = useState('All Cities');
+  const [selectedExp, setSelectedExp] = useState('All Experience');
 
   // Live telemetry from Supabase / Backend API
   const [datasetSummary, setDatasetSummary] = useState(null);
-  const [liveSalaryInsights, setLiveSalaryInsights] = useState(null);
   const [isBackendConnected, setIsBackendConnected] = useState(false);
 
   const targetRoleObj = SKILL_ROLES[targetRole] || SKILL_ROLES['ml-engineer'];
-  const userExtracted = analyzerExtracted?.all || gapResults?.cats?.strong || [];
+  const userSkillList = userSkills?.all || gapResults?.cats?.strong || [];
 
   // Fetch live backend metrics on mount
   useEffect(() => {
     let isMounted = true;
     async function loadTelemetry() {
       try {
-        const [sumRes, salRes] = await Promise.all([
-          apiFetch('/api/dataset/summary').catch(() => null),
-          apiFetch('/api/datascience-jobs/salary-insights').catch(() => null),
-        ]);
-
+        const sumRes = await apiFetch('/api/dataset/summary').catch(() => null);
         if (sumRes && sumRes.ok) {
           const sumData = await sumRes.json();
           if (isMounted) {
@@ -47,104 +52,112 @@ export default function JobMarketPage() {
             setIsBackendConnected(true);
           }
         }
-        if (salRes && salRes.ok) {
-          const salData = await salRes.json();
-          if (isMounted) setLiveSalaryInsights(salData);
-        }
       } catch {
-        // Graceful offline fallback
+        // Graceful fallback
       }
     }
     loadTelemetry();
     return () => { isMounted = false; };
   }, []);
 
-  // Filtered and sorted jobs list
-  const filteredJobs = useMemo(() => {
-    return MARKET_JOBS.filter(job => {
-      // Category filter
-      if (selectedCategory !== 'All Categories' && job.category !== selectedCategory) {
-        return false;
-      }
-      // Role filter
-      if (selectedRoleFilter !== 'all' && job.roleKey !== selectedRoleFilter) {
-        return false;
-      }
-      // Search query (title, company, skills, or desc)
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesTitle = job.title.toLowerCase().includes(q);
-        const matchesCompany = job.company.toLowerCase().includes(q);
-        const matchesLocation = job.location.toLowerCase().includes(q);
-        const matchesSkills = job.skills.some(s => s.toLowerCase().includes(q));
-        if (!matchesTitle && !matchesCompany && !matchesLocation && !matchesSkills) {
+  // Compute live Dataset Graph Analysis metrics
+  const marketInsights = useMemo(() => {
+    return getMarketInsights(targetRoleObj.name);
+  }, [targetRoleObj]);
+
+  // AI Job Recommendations from dataset
+  const recommendedJobsList = useMemo(() => {
+    if (searchQuery.trim()) {
+      return searchJobs(searchQuery, {
+        location: selectedCity !== 'All Cities' ? selectedCity : '',
+        experience: selectedExp !== 'All Experience' ? selectedExp : '',
+        limit: 80,
+      }).map(j => {
+        // Compute match percentage
+        const have = new Set((userSkillList || []).map(s => s.toLowerCase()));
+        const jSkills = j.skills || [];
+        const hit = jSkills.filter(s => have.has(s.toLowerCase()));
+        const miss = jSkills.filter(s => !have.has(s.toLowerCase()));
+        const pct = jSkills.length > 0 ? Math.round((hit.length / jSkills.length) * 100) : 0;
+        return {
+          ...j,
+          match_percent: userSkillList.length === 0 ? 0 : pct,
+          you_have: hit,
+          you_miss: miss,
+        };
+      });
+    }
+
+    return recommendJobs(userSkillList, {
+      location: selectedCity !== 'All Cities' ? selectedCity : '',
+      limit: 80,
+    }).filter(j => {
+      if (selectedExp !== 'All Experience') {
+        if (!j.experience || !j.experience.toLowerCase().includes(selectedExp.toLowerCase())) {
           return false;
         }
       }
       return true;
     });
-  }, [selectedCategory, selectedRoleFilter, searchQuery]);
+  }, [userSkillList, selectedCity, selectedExp, searchQuery]);
 
+  // Sorted job results
   const sortedJobs = useMemo(() => {
-    const list = [...filteredJobs];
+    const list = [...recommendedJobsList];
     if (sortMode === 'match') {
-      return list.sort((a, b) => {
-        const ma = computeJobMatch(a, userExtracted).pct;
-        const mb = computeJobMatch(b, userExtracted).pct;
-        return mb - ma;
-      });
-    }
-    if (sortMode === 'salary') {
-      const getNum = (str) => {
-        const m = str.match(/₹?(\d+(\.\d+)?)L/);
-        return m ? parseFloat(m[1]) : 0;
-      };
-      return list.sort((a, b) => getNum(b.salary) - getNum(a.salary));
+      return list.sort((a, b) => (b.match_percent || 0) - (a.match_percent || 0));
     }
     return list;
-  }, [filteredJobs, sortMode, userExtracted]);
+  }, [recommendedJobsList, sortMode]);
 
-  // Skill Coverage Benchmarks calculated dynamically from the active role's required skills
-  const coverageSkills = useMemo(() => {
-    const skills = targetRoleObj.skills || [];
-    const userSet = new Set(userExtracted.map(s => String(s).toLowerCase().trim()));
-    return skills.map(sk => {
-      const isOwned = userSet.has(sk.name.toLowerCase().trim());
-      // Calculate coverage percentage based on weight & ownership
-      const pct = isOwned ? 92 : Math.max(25, Math.round((1 - sk.weight) * 60));
-      return {
-        name: sk.name,
-        pct,
-        weight: Math.round(sk.weight * 100),
-        required: sk.required,
-        isOwned,
-      };
+  // Collect all missing skills across top recommended jobs
+  const topMissingSkills = useMemo(() => {
+    const counts = {};
+    sortedJobs.slice(0, 20).forEach(j => {
+      (j.you_miss || []).forEach(s => {
+        counts[s] = (counts[s] || 0) + 1;
+      });
     });
-  }, [targetRoleObj, userExtracted]);
+    // Add target role gaps if available
+    (gapResults?.gaps || []).forEach(s => {
+      counts[s] = (counts[s] || 0) + 3;
+    });
+
+    const sorted = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([s]) => s);
+
+    return sorted.length > 0 ? sorted.slice(0, 8) : ['PyTorch', 'Docker', 'Kubernetes', 'AWS', 'MLOps'];
+  }, [sortedJobs, gapResults]);
+
+  // Curated free courses recommended by AI for missing skills
+  const courseRecommendations = useMemo(() => {
+    return getCourseRecommendations(topMissingSkills);
+  }, [topMissingSkills]);
 
   return (
     <div className="job-market-page">
-      {/* Header matching SkillBridge job market.html */}
+      {/* Header Bar */}
       <div className="hello">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1>Job Market Intelligence</h1>
+            <h1>AI Job Market Intelligence</h1>
             <span
               className="badge"
               style={{
-                background: isBackendConnected ? 'rgba(20, 160, 152, 0.15)' : 'rgba(245, 160, 43, 0.15)',
-                color: isBackendConnected ? 'var(--teal)' : 'var(--amber)',
+                background: 'rgba(232, 130, 58, 0.15)',
+                color: 'var(--brand-light)',
                 fontSize: 11,
                 fontWeight: 700,
                 padding: '3px 10px',
                 borderRadius: 99,
               }}
             >
-              {isBackendConnected ? '● Live Telemetry (17,743 Records)' : '● 20 Dataset Benchmarks'}
+              ● 623 Real Indian Job Postings (LinkedIn Dataset)
             </span>
           </div>
           <p className="role">
-            20 real engineering & analytics job titles synchronized with <strong>DataScience Jobs.csv</strong> and <strong>Analytics Jobs.csv</strong>. Match % is computed live against your skills.
+            Live AI recommendation engine grounded in real postings across <strong>Bengaluru, Hyderabad, Pune, Mumbai & Delhi NCR</strong>. Match score is computed mathematically against your profile skills.
           </p>
         </div>
 
@@ -161,9 +174,9 @@ export default function JobMarketPage() {
                 fontSize: 13,
                 fontWeight: 600,
                 borderRadius: 10,
-                background: 'var(--field)',
-                border: '1px solid var(--line)',
-                color: 'var(--ink)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
               }}
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
@@ -185,69 +198,95 @@ export default function JobMarketPage() {
         </div>
       </div>
 
-      {/* Tabs list matching SkillBridge job market.html (.tabs2) */}
-      <div className="tabs2" role="tablist" id="tabs">
+      {/* Main View Switcher Tabs */}
+      <div style={{ display: 'flex', gap: 8, margin: '20px 0 16px 0', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 10, flexWrap: 'wrap' }}>
         <button
           type="button"
-          role="tab"
-          aria-selected={activeTab === 'p1'}
-          className={activeTab === 'p1' ? 'active' : ''}
-          onClick={() => setActiveTab('p1')}
+          className={`btn-chip ${activeTab === 'jobs' ? 'active' : ''}`}
+          onClick={() => setActiveTab('jobs')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            padding: '7px 16px',
+            borderRadius: 8,
+            fontWeight: 700,
+            background: activeTab === 'jobs' ? 'rgba(232, 130, 58, 0.2)' : 'var(--bg-subtle)',
+            color: activeTab === 'jobs' ? 'var(--brand-light)' : 'var(--text-muted)',
+            border: activeTab === 'jobs' ? '1px solid var(--brand)' : '1px solid var(--border-subtle)',
+          }}
         >
-          Open positions ({sortedJobs.length})
+          <Briefcase size={15} />
+          <span>AI Job Matches ({sortedJobs.length})</span>
         </button>
+
         <button
           type="button"
-          role="tab"
-          aria-selected={activeTab === 'p2'}
-          className={activeTab === 'p2' ? 'active' : ''}
-          onClick={() => setActiveTab('p2')}
+          className={`btn-chip ${activeTab === 'analysis' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analysis')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            padding: '7px 16px',
+            borderRadius: 8,
+            fontWeight: 700,
+            background: activeTab === 'analysis' ? 'rgba(232, 130, 58, 0.2)' : 'var(--bg-subtle)',
+            color: activeTab === 'analysis' ? 'var(--brand-light)' : 'var(--text-muted)',
+            border: activeTab === 'analysis' ? '1px solid var(--brand)' : '1px solid var(--border-subtle)',
+          }}
         >
-          Skill coverage ({targetRoleObj.name})
+          <BarChart3 size={15} />
+          <span>Dataset Graph Analysis</span>
         </button>
+
         <button
           type="button"
-          role="tab"
-          aria-selected={activeTab === 'p3'}
-          className={activeTab === 'p3' ? 'active' : ''}
-          onClick={() => setActiveTab('p3')}
+          className={`btn-chip ${activeTab === 'courses' ? 'active' : ''}`}
+          onClick={() => setActiveTab('courses')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            padding: '7px 16px',
+            borderRadius: 8,
+            fontWeight: 700,
+            background: activeTab === 'courses' ? 'rgba(232, 130, 58, 0.2)' : 'var(--bg-subtle)',
+            color: activeTab === 'courses' ? 'var(--brand-light)' : 'var(--text-muted)',
+            border: activeTab === 'courses' ? '1px solid var(--brand)' : '1px solid var(--border-subtle)',
+          }}
         >
-          Salary intelligence (20 Roles)
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'p4'}
-          className={activeTab === 'p4' ? 'active' : ''}
-          onClick={() => setActiveTab('p4')}
-        >
-          Datasets registry (4 Datasets)
+          <BookOpen size={15} />
+          <span>AI Course Recommendations ({courseRecommendations.length})</span>
         </button>
       </div>
 
-      {/* Panel 1: Open Positions */}
-      {activeTab === 'p1' && (
-        <section className="panel" id="p1">
-          {/* Controls Bar: Search, Category Filter, and Sorting */}
+      {/* ─── TAB 1: AI JOB RECOMMENDATIONS ────────────────────────────────────── */}
+      {activeTab === 'jobs' && (
+        <div className="card" style={{ padding: 20 }}>
+          {/* Search & Filter Toolbar */}
           <div
             style={{
               display: 'flex',
-              flexWrap: 'wrap',
               gap: 12,
-              justifyContent: 'space-between',
+              flexWrap: 'wrap',
               alignItems: 'center',
+              justifyContent: 'space-between',
               marginBottom: 16,
               paddingBottom: 16,
-              borderBottom: '1px solid var(--line)',
+              borderBottom: '1px solid var(--border-subtle)',
             }}
           >
             {/* Search Input */}
-            <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
-              <Search size={14} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--mute)' }} />
+            <div style={{ position: 'relative', flex: '1 1 260px', minWidth: 220 }}>
+              <Search size={14} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-subtle)' }} />
               <input
                 type="text"
                 className="form-input"
-                placeholder="Search company, job title, skills..."
+                placeholder="Search job title, company, skills (e.g. Python, Amazon)..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 style={{
@@ -258,30 +297,49 @@ export default function JobMarketPage() {
                   paddingBottom: 8,
                   fontSize: 13,
                   borderRadius: 10,
-                  background: 'var(--field)',
-                  border: '1px solid var(--line)',
-                  color: 'var(--ink)',
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text)',
                 }}
               />
             </div>
 
-            {/* Category Filter */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* City Filter */}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <select
                 className="form-select"
                 style={{
                   padding: '7px 12px',
                   fontSize: 12.5,
                   borderRadius: 10,
-                  background: 'var(--field)',
-                  border: '1px solid var(--line)',
-                  color: 'var(--ink)',
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text)',
                 }}
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
+                value={selectedCity}
+                onChange={e => setSelectedCity(e.target.value)}
               >
-                {ROLE_CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {['All Cities', 'Bengaluru', 'Hyderabad', 'Pune', 'Mumbai', 'Noida', 'Gurugram', 'Delhi NCR', 'Chennai'].map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+
+              {/* Experience Filter */}
+              <select
+                className="form-select"
+                style={{
+                  padding: '7px 12px',
+                  fontSize: 12.5,
+                  borderRadius: 10,
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text)',
+                }}
+                value={selectedExp}
+                onChange={e => setSelectedExp(e.target.value)}
+              >
+                {['All Experience', 'Entry level', 'Associate', 'Mid-Senior level'].map(e => (
+                  <option key={e} value={e}>{e}</option>
                 ))}
               </select>
 
@@ -289,400 +347,323 @@ export default function JobMarketPage() {
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
-                onClick={() => setSortMode(m => (m === 'match' ? 'salary' : m === 'salary' ? 'recent' : 'match'))}
+                onClick={() => setSortMode(m => (m === 'match' ? 'recent' : 'match'))}
                 title="Toggle sorting mode"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '7px 14px' }}
               >
                 <ArrowUpDown size={13} />
-                {sortMode === 'match' ? 'Sort: Best Match' : sortMode === 'salary' ? 'Sort: Top Salary' : 'Sort: Default'}
+                {sortMode === 'match' ? 'Sort: Best AI Match %' : 'Sort: Default'}
               </button>
             </div>
           </div>
 
-          {/* Active Filtering Info */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 12, color: 'var(--mute)' }}>
-              Showing <strong>{sortedJobs.length}</strong> verified opportunities · Targeting <strong>{targetRoleObj.name}</strong>
-            </span>
-            <span style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 600 }}>
-              Average Market Base: {targetRoleObj.avgSalary}
+          {/* User skills status indicator */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, background: 'rgba(255, 255, 255, 0.03)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Sparkles size={14} color="var(--brand-light)" />
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                Your Profile Skills: {userSkillList.length > 0 ? <strong>{userSkillList.join(', ')}</strong> : <em style={{ color: 'var(--warning)' }}>No skills verified yet (showing 0% base fit). Run Skill Assessment to unlock high match % scores!</em>}
+              </span>
+            </div>
+            <span style={{ fontSize: 12, color: 'var(--text-subtle)' }}>
+              Showing {sortedJobs.length} matching openings
             </span>
           </div>
 
-          {/* Jobs List */}
+          {/* Jobs List Grid */}
           {sortedJobs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--mute)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
               <Briefcase size={36} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
-              <p style={{ margin: 0, fontWeight: 600 }}>No job postings match your filters.</p>
+              <p style={{ margin: 0, fontWeight: 600 }}>No job postings match your active filter.</p>
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
                 style={{ marginTop: 12 }}
-                onClick={() => { setSearchQuery(''); setSelectedCategory('All Categories'); setSelectedRoleFilter('all'); }}
+                onClick={() => { setSearchQuery(''); setSelectedCity('All Cities'); setSelectedExp('All Experience'); }}
               >
-                Reset Filters
+                Clear Filters
               </button>
             </div>
           ) : (
-            sortedJobs.map((job) => {
-              const match = computeJobMatch(job, userExtracted);
-              const userSkillsSet = new Set(userExtracted.map(s => String(s).toLowerCase().trim()));
-              const linkedinUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(job.title)}&location=${encodeURIComponent(job.location.split(' ')[0])}&f_TP=1`;
-
-              return (
-                <article key={job.id} className="job" style={{ alignItems: 'flex-start' }}>
-                  {/* Company Logo Monogram */}
-                  <div
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      background: job.logoBg || 'linear-gradient(135deg, var(--teal), var(--navy))',
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 15,
-                      fontWeight: 800,
-                      flexShrink: 0,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-                    }}
-                  >
-                    {job.logo || job.company[0]}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <b style={{ fontSize: 15, color: 'var(--ink)' }}>{job.title}</b>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: 6,
-                          background: 'rgba(20, 160, 152, 0.1)',
-                          color: 'var(--teal)',
-                        }}
-                      >
-                        {job.salary}
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 10, fontSize: 12, color: 'var(--mute)', margin: '4px 0 6px 0', flexWrap: 'wrap' }}>
-                      <span>🏢 <strong>{job.company}</strong></span>
-                      <span>📍 {job.location}</span>
-                      <span>⏳ {job.exp}</span>
-                      {job.source && (
-                        <span style={{ color: 'var(--amber)', fontWeight: 600 }}>
-                          📋 {job.source}
-                        </span>
-                      )}
-                    </div>
-
-                    <p style={{ margin: '6px 0 10px 0', fontSize: 12.5, color: 'var(--text-subtle)', lineHeight: 1.45 }}>
-                      {job.desc}
-                    </p>
-
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {job.skills.map((skill) => {
-                        const hasSkill = userSkillsSet.has(skill.toLowerCase().trim());
-                        return (
-                          <i
-                            key={skill}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {sortedJobs.map((job) => (
+                <div
+                  key={job.job_id || `${job.title}-${job.company}`}
+                  style={{
+                    background: 'var(--bg-subtle)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 10,
+                    padding: '16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12,
+                    transition: 'border-color 0.2s',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                        <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                          {job.title}
+                        </h3>
+                        {job.match_percent > 0 && (
+                          <span
                             style={{
-                              background: hasSkill ? 'rgba(20, 160, 152, 0.18)' : 'color-mix(in srgb, var(--field) 80%, transparent)',
-                              borderColor: hasSkill ? 'rgba(20, 160, 152, 0.4)' : 'var(--line)',
-                              color: hasSkill ? 'var(--teal)' : 'var(--mute)',
-                              fontWeight: hasSkill ? 700 : 500,
+                              background: job.match_percent >= 60 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(232, 130, 58, 0.15)',
+                              color: job.match_percent >= 60 ? '#10b981' : 'var(--brand-light)',
+                              fontWeight: 700,
+                              fontSize: 11,
+                              padding: '2px 8px',
+                              borderRadius: 6,
                             }}
                           >
-                            {hasSkill ? '✓ ' : ''}{skill}
-                          </i>
-                        );
-                      })}
+                            {job.match_percent}% AI Match
+                          </span>
+                        )}
+                        {job.experience && (
+                          <span style={{ fontSize: 11, background: 'rgba(255, 255, 255, 0.06)', padding: '2px 8px', borderRadius: 6, color: 'var(--text-muted)' }}>
+                            {job.experience}
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, color: 'var(--text)' }}>
+                          <Building size={13} /> {job.company}
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={13} /> {job.city || job.location}
+                        </span>
+                        {job.min_years > 0 && (
+                          <span>Min {job.min_years} Years Exp</span>
+                        )}
+                      </div>
                     </div>
+
+                    <a
+                      href={job.apply_link || `https://www.linkedin.com/jobs/view/${job.job_id}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        textDecoration: 'none',
+                        fontSize: 12,
+                        padding: '6px 14px',
+                        fontWeight: 700,
+                      }}
+                    >
+                      <span>Apply on LinkedIn</span>
+                      <ExternalLink size={13} />
+                    </a>
                   </div>
 
-                  <div className="m" style={{ alignSelf: 'center' }}>
-                    <strong style={{ color: match.pct >= 70 ? 'var(--teal)' : match.pct >= 40 ? 'var(--amber)' : 'var(--mute)' }}>
-                      {match.pct}%
-                    </strong>
-                    <small>match</small>
-                    <div className="bar2">
-                      <i style={{ width: `${match.pct}%` }}></i>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    style={{ fontSize: 11, padding: '7px 14px', flexShrink: 0, marginLeft: 10, alignSelf: 'center' }}
-                    onClick={() => window.open(linkedinUrl, '_blank')}
-                    title="Search position on LinkedIn"
-                  >
-                    <ExternalLink size={12} style={{ display: 'inline', marginRight: 4 }} />
-                    Apply
-                  </button>
-                </article>
-              );
-            })
-          )}
-        </section>
-      )}
-
-      {/* Panel 2: Skill Coverage */}
-      {activeTab === 'p2' && (
-        <section className="panel" id="p2">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <h2>Skill Coverage Intelligence</h2>
-              <p className="role" style={{ margin: 0 }}>
-                Requirement weights and benchmark thresholds for <strong>{targetRoleObj.name}</strong>.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <span className="badge badge-brand" style={{ fontSize: 11 }}>
-                Role Category: {targetRoleObj.category}
-              </span>
-              <span className="badge badge-warning" style={{ fontSize: 11 }}>
-                Avg Salary: {targetRoleObj.avgSalary}
-              </span>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 22 }}>
-            {coverageSkills.map((c) => (
-              <div key={c.name} className="r" style={{ padding: '10px 0' }}>
-                <div style={{ width: 170, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {c.isOwned ? (
-                    <CheckCircle2 size={14} color="var(--teal)" />
-                  ) : (
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--amber)', display: 'inline-block' }} />
-                  )}
-                  <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{c.name}</span>
-                </div>
-
-                <div className="bar2" style={{ flex: 1, margin: '0 16px' }}>
-                  <i
-                    style={{
-                      width: `${c.pct}%`,
-                      background: c.isOwned
-                        ? 'linear-gradient(90deg, var(--teal), var(--teal2))'
-                        : 'linear-gradient(90deg, var(--amber), #f97316)',
-                    }}
-                  ></i>
-                </div>
-
-                <div style={{ width: 120, textAlign: 'right', display: 'flex', gap: 10, justifyContent: 'flex-end', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'var(--mute)' }}>Weight: {c.weight}%</span>
-                  <b style={{ color: c.isOwned ? 'var(--teal)' : 'var(--amber)' }}>{c.pct}%</b>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 26, paddingTop: 18, borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--mute)' }}>
-            <span>💡 Calibrated against <strong>15,841 jobs</strong> from Analytics Jobs.csv and <strong>93,005 openings</strong> from DataScience Jobs.csv.</span>
-            <span>Targeting {targetRoleObj.name} ({targetRoleObj.minExp})</span>
-          </div>
-        </section>
-      )}
-
-      {/* Panel 3: Salary Intelligence */}
-      {activeTab === 'p3' && (
-        <section className="panel" id="p3">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div>
-              <h2>Salary Intelligence Across 20 Tech Roles</h2>
-              <p className="role" style={{ margin: 0 }}>
-                Empirical compensation distributions derived from <strong>DataScience Jobs.csv</strong> (1,602 company records) and verified salary bands.
-              </p>
-            </div>
-            {liveSalaryInsights?.overview && (
-              <div style={{ textAlign: 'right', fontSize: 12 }}>
-                <span style={{ color: 'var(--mute)' }}>Dataset Overall Average: </span>
-                <strong style={{ color: 'var(--teal)', fontSize: 15 }}>₹{liveSalaryInsights.overview.overall_avg_salary_lakhs}L LPA</strong>
-              </div>
-            )}
-          </div>
-
-          {/* Experience Tier Badges */}
-          {liveSalaryInsights?.experienceBenchmarks && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12, margin: '18px 0' }}>
-              {liveSalaryInsights.experienceBenchmarks.map(tier => (
-                <div key={tier.experience_tier} style={{ background: 'var(--field)', border: '1px solid var(--line)', borderRadius: 12, padding: '12px 14px' }}>
-                  <div style={{ fontSize: 11, color: 'var(--mute)', fontWeight: 600 }}>{tier.experience_tier}</div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--ink)', margin: '4px 0' }}>
-                    ₹{tier.avg_salary_lakhs}L <small style={{ fontSize: 11, fontWeight: 500, color: 'var(--mute)' }}>avg</small>
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--teal)', fontWeight: 600 }}>
-                    ₹{tier.avg_min_salary_lakhs}L – ₹{tier.avg_max_salary_lakhs}L range
+                  {/* Skills Breakdown */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', paddingTop: 8, borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-subtle)' }}>Skills:</span>
+                    {(job.skills || []).map(sk => {
+                      const isOwned = (job.you_have || []).includes(sk);
+                      return (
+                        <span
+                          key={sk}
+                          style={{
+                            fontSize: 11,
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            background: isOwned ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                            color: isOwned ? '#10b981' : 'var(--text-muted)',
+                            border: isOwned ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
+                            fontWeight: isOwned ? 600 : 400,
+                          }}
+                        >
+                          {isOwned ? `✓ ${sk}` : sk}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
             </div>
           )}
-
-          {/* Detailed Salary Bands Breakdown for all 20 Roles */}
-          <div style={{ marginTop: 20 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', marginBottom: 14 }}>
-              Annual Compensation Range by Role (Lakhs INR)
-            </h3>
-            {SALARY_BANDS.map(band => {
-              const maxSal = 110;
-              const left = (band.min / maxSal) * 100;
-              const width = Math.max(4, ((band.max - band.min) / maxSal) * 100);
-              const isCurrentTarget = band.role.toLowerCase().includes(targetRoleObj.name.toLowerCase().slice(0, 8));
-
-              return (
-                <div
-                  key={band.role}
-                  className="salary-row"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 14,
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    background: isCurrentTarget ? 'rgba(20, 160, 152, 0.08)' : 'transparent',
-                    border: isCurrentTarget ? '1px solid rgba(20, 160, 152, 0.3)' : '1px solid transparent',
-                  }}
-                >
-                  <div style={{ width: 230, fontSize: 13, fontWeight: isCurrentTarget ? 700 : 600, color: 'var(--ink)' }}>
-                    {band.role}
-                    {isCurrentTarget && <span style={{ marginLeft: 6, fontSize: 10, color: 'var(--teal)' }}>★ Active</span>}
-                  </div>
-                  <div style={{ flex: 1, height: 10, background: 'var(--line)', borderRadius: 6, position: 'relative', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: `${left}%`,
-                        width: `${width}%`,
-                        height: '100%',
-                        background: 'linear-gradient(90deg, var(--teal), var(--amber))',
-                        borderRadius: 6,
-                      }}
-                    />
-                  </div>
-                  <div style={{ width: 130, textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--teal)' }}>
-                    ₹{band.min}L–₹{band.max}L <small style={{ fontSize: 11, color: 'var(--mute)' }}>({band.avg}L avg)</small>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+        </div>
       )}
 
-      {/* Panel 4: Datasets Registry */}
-      {activeTab === 'p4' && (
-        <section className="panel" id="p4">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <h2>Integrated Datasets Telemetry</h2>
-              <p className="role" style={{ margin: 0 }}>
-                Live verification of the 4 benchmark datasets loaded into the Supabase database and frontend memory.
+      {/* ─── TAB 2: DATASET GRAPH ANALYSIS ────────────────────────────────────── */}
+      {activeTab === 'analysis' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Key Metric Highlights */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+            <div className="card" style={{ padding: 18 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-subtle)', fontWeight: 700, textTransform: 'uppercase' }}>
+                Total Verified Postings
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--text)', marginTop: 4 }}>
+                {marketInsights.jobs_considered}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--brand-light)', marginTop: 2 }}>
+                Real Indian LinkedIn Tech Jobs Dataset
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 18 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-subtle)', fontWeight: 700, textTransform: 'uppercase' }}>
+                Fresher & Associate Roles
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#10b981', marginTop: 4 }}>
+                {marketInsights.entry_friendly_jobs}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                ≤ 1 year experience requirement
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 18 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-subtle)', fontWeight: 700, textTransform: 'uppercase' }}>
+                Leading Hiring Hub
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--text)', marginTop: 4 }}>
+                {marketInsights.top_cities[0]?.city || 'Bengaluru'}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                {marketInsights.top_cities[0]?.count || 140} active engineering openings
+              </div>
+            </div>
+          </div>
+
+          {/* Graph 1: Top Demanded Skills */}
+          <div className="card" style={{ padding: 20 }}>
+            <div style={{ marginBottom: 16 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                Top In-Demand Skills Distribution (% of Postings Demanding Skill)
+              </h3>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                Frequency of explicit skill requirements extracted via NLP from 620+ Indian tech job postings.
               </p>
             </div>
-            {datasetSummary && (
-              <span className="badge badge-brand" style={{ fontSize: 12, padding: '4px 12px' }}>
-                Total Verified Records: {datasetSummary.totalIntegratedRecords?.toLocaleString()}
-              </span>
-            )}
-          </div>
 
-          {/* 4 Dataset Cards */}
-          <div
-            style={{
-              marginTop: 22,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: 16,
-            }}
-          >
-            {DATASETS.map((ds, index) => {
-              const liveData = datasetSummary?.datasets?.find(d => d.sourceFile === ds.sourceFile || d.table === ds.table);
-              const countDisplay = liveData ? `${liveData.recordsCount?.toLocaleString()} Records` : ds.records;
-
-              return (
-                <div
-                  key={ds.name}
-                  style={{
-                    background: 'color-mix(in srgb, var(--field) 70%, transparent)',
-                    border: '1.5px solid var(--line)',
-                    borderRadius: 16,
-                    padding: 18,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                      <b style={{ fontSize: 14.5, color: 'var(--ink)' }}>{ds.name}</b>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          padding: '3px 8px',
-                          borderRadius: 99,
-                          background: 'rgba(20, 160, 152, 0.15)',
-                          color: 'var(--teal)',
-                        }}
-                      >
-                        {ds.category}
-                      </span>
-                    </div>
-
-                    <p style={{ fontSize: 12.5, color: 'var(--mute)', margin: '6px 0 12px', lineHeight: 1.5 }}>
-                      {ds.desc}
-                    </p>
-                  </div>
-
-                  <div style={{ paddingTop: 12, borderTop: '1px solid var(--line)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--ink)', fontWeight: 600, marginBottom: 6 }}>
-                      <span>📊 Volume:</span>
-                      <span style={{ color: 'var(--teal)' }}>{countDisplay}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--mute)' }}>
-                      <span>File: {ds.sourceFile}</span>
-                      <a
-                        href={ds.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          color: 'var(--teal)',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 3,
-                        }}
-                      >
-                        API Endpoint <ExternalLink size={10} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Quick API Verification Guide */}
-          <div style={{ marginTop: 28, padding: 18, borderRadius: 14, background: 'rgba(20, 160, 152, 0.06)', border: '1px solid rgba(20, 160, 152, 0.2)' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: 14, fontWeight: 700, color: 'var(--teal)' }}>
-              ⚡ Live Backend REST Architecture:
-            </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10, fontSize: 12, color: 'var(--ink)' }}>
-              <div>• <code>GET /api/datascience-jobs/roles</code> – 20 Benchmark Role Averages</div>
-              <div>• <code>GET /api/datascience-jobs/salary-insights</code> – Salary Ranges & Experience Tiers</div>
-              <div>• <code>GET /api/skillgap/jobs</code> – 15,841 Open Job Postings</div>
-              <div>• <code>GET /api/traits/jds</code> – 139 Junior Data Scientist Skill Vectors</div>
-              <div>• <code>GET /api/traits/sds</code> – 161 Senior Data Scientist Big Five Vectors</div>
-              <div>• <code>GET /api/dataset/summary</code> – PostgreSQL Schema & Record Telemetry</div>
+            <div style={{ height: 320, width: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={marketInsights.top_skills} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="skill" stroke="var(--text-subtle)" fontSize={11} angle={-25} textAnchor="end" />
+                  <YAxis stroke="var(--text-subtle)" fontSize={11} unit="%" />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}
+                    formatter={(val) => [`${val}% of jobs`, 'Demand Frequency']}
+                  />
+                  <Bar dataKey="demand_percent" fill="var(--brand)" radius={[4, 4, 0, 0]}>
+                    {marketInsights.top_skills.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index < 3 ? 'var(--brand-light)' : 'var(--brand)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
-        </section>
+
+          {/* Graph 2: City Tech Hub Cluster */}
+          <div className="card" style={{ padding: 20 }}>
+            <div style={{ marginBottom: 16 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                Job Openings Distribution by Major Indian Tech Hubs
+              </h3>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                Hiring volume concentration across metropolitan IT clusters.
+              </p>
+            </div>
+
+            <div style={{ height: 260, width: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={marketInsights.top_cities} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis type="number" stroke="var(--text-subtle)" fontSize={11} />
+                  <YAxis type="category" dataKey="city" stroke="var(--text-subtle)" fontSize={12} width={90} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}
+                    formatter={(val) => [`${val} postings`, 'Open Jobs']}
+                  />
+                  <Bar dataKey="count" fill="#10b981" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 3: AI COURSE & RESOURCE RECOMMENDATIONS ──────────────────────── */}
+      {activeTab === 'courses' && (
+        <div className="card" style={{ padding: 20 }}>
+          <div style={{ marginBottom: 18, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 14 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+              Curated Free Certified Courses & Practical Sandboxes
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+              Personalized based on skills demanded in your top matching job postings and target role ({targetRoleObj.name}). All resources are 100% free with verified industry value.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+            {courseRecommendations.map(c => (
+              <div
+                key={c.skill}
+                style={{
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 10,
+                  padding: 18,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: 'var(--brand-light)' }}>
+                      {c.skill}
+                    </span>
+                    <span style={{ fontSize: 10, background: 'rgba(255, 255, 255, 0.08)', padding: '2px 8px', borderRadius: 4, color: 'var(--text-subtle)' }}>
+                      {c.duration || '2-4 Weeks'}
+                    </span>
+                  </div>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 6px 0', color: 'var(--text)', lineHeight: 1.4 }}>
+                    {c.title}
+                  </h4>
+
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+                    Provider: <strong>{c.provider}</strong>
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: 12, marginTop: 4 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
+                    Level: {c.level || 'All Levels'}
+                  </span>
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: 11,
+                      padding: '4px 10px',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span>Start Free</span>
+                    <ExternalLink size={11} />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -15,9 +15,8 @@ import { generateICSContent } from '../lib/storage.js';
 import SkillResourceModules from '../components/ui/SkillResourceModules.jsx';
 
 // ─── Trajectory Simulation Generator ─────────────────────────────────────────
-function generateTrajectoryCurve(pacing = 'balanced', weeks = 12) {
+function generateTrajectoryCurve(pacing = 'balanced', weeks = 12, baseline = 0) {
   const growthRate = { conservative: 4.8, balanced: 6.8, aggressive: 9.4 }[pacing] || 6.8;
-  const baseline = 25;
   const points = [];
 
   for (let w = 0; w <= weeks; w++) {
@@ -42,21 +41,56 @@ function generateTrajectoryCurve(pacing = 'balanced', weeks = 12) {
   return points;
 }
 
-// ─── Domain Competency Breakdown Data ───────────────────────────────────────
-const DOMAIN_COMPETENCIES = [
-  { domain: 'Python & Algorithms', current: 75, target: 90 },
-  { domain: 'SQL & Data Modeling', current: 70, target: 85 },
-  { domain: 'Docker & Containers', current: 35, target: 80 },
-  { domain: 'MLOps & CI/CD', current: 25, target: 80 },
-  { domain: 'Cloud & Telemetry', current: 20, target: 75 },
-  { domain: 'System Design', current: 40, target: 75 },
-];
-
 // ─── Visual Skill Trajectory & Mastery Graph Component ──────────────────────
 function SkillTrajectoryGraph({ pacing, setPacing, roleName }) {
   const [graphMode, setGraphMode] = useState('curve'); // 'curve' | 'domains'
+  const user = useStore(s => s.user);
+  const userSkills = useStore(s => s.userSkills);
+  const gapResults = useStore(s => s.gapResults);
+
+  const isDemo = (user?.email === 'user@skillbridge.io' || user?.email === 'alex@skillbridge.io') && (user?.id === 1 || user?.id === '1') && Boolean(userSkills?.all?.length > 0 || gapResults);
+  const hasUserSkills = Boolean((userSkills?.all && userSkills.all.length > 0) || gapResults);
+
+  const baseline = isDemo ? 25 : (hasUserSkills ? 20 : 0);
   const weeks = PACING_MODES[pacing]?.totalWeeks || 12;
-  const trajectoryData = useMemo(() => generateTrajectoryCurve(pacing, weeks), [pacing, weeks]);
+  const trajectoryData = useMemo(() => generateTrajectoryCurve(pacing, weeks, baseline), [pacing, weeks, baseline]);
+
+  // Compute domain mastery: new users strictly start at 0%
+  const domainCompetencies = useMemo(() => {
+    if (!hasUserSkills && !isDemo) {
+      return [
+        { domain: 'Python & Algorithms', current: 0, target: 90 },
+        { domain: 'SQL & Data Modeling', current: 0, target: 85 },
+        { domain: 'Docker & Containers', current: 0, target: 80 },
+        { domain: 'MLOps & CI/CD', current: 0, target: 80 },
+        { domain: 'Cloud & Telemetry', current: 0, target: 75 },
+        { domain: 'System Design', current: 0, target: 75 },
+      ];
+    }
+    if (isDemo) {
+      return [
+        { domain: 'Python & Algorithms', current: 75, target: 90 },
+        { domain: 'SQL & Data Modeling', current: 70, target: 85 },
+        { domain: 'Docker & Containers', current: 35, target: 80 },
+        { domain: 'MLOps & CI/CD', current: 25, target: 80 },
+        { domain: 'Cloud & Telemetry', current: 20, target: 75 },
+        { domain: 'System Design', current: 40, target: 75 },
+      ];
+    }
+    const skillList = (userSkills?.all || []).map(s => String(s).toLowerCase());
+    const scoreDomain = (matchArr, target) => {
+      const hits = matchArr.filter(s => skillList.includes(s.toLowerCase())).length;
+      return { current: Math.round((hits / matchArr.length) * 100), target };
+    };
+    return [
+      { domain: 'Python & Algorithms', ...scoreDomain(['Python', 'Data Structures', 'Algorithms'], 90) },
+      { domain: 'SQL & Data Modeling', ...scoreDomain(['SQL', 'PostgreSQL', 'Pandas'], 85) },
+      { domain: 'Docker & Containers', ...scoreDomain(['Docker', 'Kubernetes'], 80) },
+      { domain: 'MLOps & CI/CD', ...scoreDomain(['MLOps', 'CI/CD', 'Git'], 80) },
+      { domain: 'Cloud & Telemetry', ...scoreDomain(['AWS', 'Cloud'], 75) },
+      { domain: 'System Design', ...scoreDomain(['FastAPI', 'REST API', 'Architecture'], 75) },
+    ];
+  }, [hasUserSkills, isDemo, userSkills]);
 
   return (
     <div className="card" style={{ marginBottom: 20 }}>
@@ -234,7 +268,7 @@ function SkillTrajectoryGraph({ pacing, setPacing, roleName }) {
       ) : (
         /* Domain Mastery Comparison Bar Breakdown */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
-          {DOMAIN_COMPETENCIES.map((d) => (
+          {domainCompetencies.map((d) => (
             <div key={d.domain} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                 <span style={{ fontWeight: 600, color: 'var(--text)' }}>{d.domain}</span>

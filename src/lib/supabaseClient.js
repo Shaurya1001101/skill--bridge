@@ -114,11 +114,12 @@ export async function supabaseLogin(identifier, password) {
           .eq('user_id', dbUser.id)
           .limit(1);
 
+        const isDemoAccount = dbUser.id === 1 || dbUser.email === 'user@skillbridge.io' || dbUser.username === 'alexmercer';
         const profile = profiles?.[0] || {
-          xp: 75,
-          streak: 5,
-          target_role: 'data-scientist',
-          skills_json: { all: ['Python', 'SQL', 'Git'] },
+          xp: isDemoAccount ? 75 : 0,
+          streak: isDemoAccount ? 5 : 1,
+          target_role: 'ml-engineer',
+          skills_json: isDemoAccount ? { all: ['Python', 'SQL', 'Git'] } : { all: [] },
         };
 
         // Fetch committed path
@@ -135,7 +136,7 @@ export async function supabaseLogin(identifier, password) {
               completedTaskIds: paths[0].completed_task_ids || [],
               tasks: paths[0].tasks_schedule_json || [],
             }
-          : null;
+          : (isDemoAccount ? { role: 'data-scientist', pacing: 'balanced', completedTaskIds: ['task-1', 'task-2'] } : null);
 
         return {
           user: {
@@ -146,9 +147,9 @@ export async function supabaseLogin(identifier, password) {
             role: dbUser.role || 'User',
           },
           profile: {
-            xp: profile.xp || 75,
-            streak: profile.streak || 5,
-            targetRole: profile.target_role || 'data-scientist',
+            xp: profile.xp ?? 0,
+            streak: profile.streak || 1,
+            targetRole: profile.target_role || 'ml-engineer',
             skills: profile.skills_json || { all: [] },
           },
           committedPath,
@@ -208,10 +209,10 @@ export async function supabaseLogin(identifier, password) {
       role: 'User',
     },
     profile: {
-      xp: 25,
+      xp: 0,
       streak: 1,
-      targetRole: 'data-scientist',
-      skills: { all: ['Python', 'SQL'] },
+      targetRole: 'ml-engineer',
+      skills: { all: [] },
     },
     committedPath: null,
     token: `sb-user-${Date.now()}`,

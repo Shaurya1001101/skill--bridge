@@ -55,10 +55,14 @@ const REACHABLE_ROLES = {
 
 export default function TrajectoryPage() {
   const navigate = useNavigate();
+  const user = useStore(s => s.user);
+  const userSkills = useStore(s => s.userSkills);
   const addToast = useStore(s => s.addToast);
   const savedGapResults = useStore(s => s.gapResults);
   const commitPath = useStore(s => s.commitPath);
   const committedPath = useStore(s => s.committedPath);
+
+  const isDemo = (user?.email === 'user@skillbridge.io' || user?.email === 'alex@skillbridge.io') && (user?.id === 1 || user?.id === '1') && Boolean(userSkills?.all?.length > 0 || savedGapResults);
 
   const [resumeText, setResumeText] = useState('');
   const [targetRole, setTargetRole] = useState(committedPath?.role || 'ml-engineer');
@@ -66,7 +70,7 @@ export default function TrajectoryPage() {
   const [extractedSkills, setExtractedSkills] = useState(null);
   const [simData, setSimData] = useState(null);
   const [depChain, setDepChain] = useState([]);
-  const [baseReadiness, setBaseReadiness] = useState(savedGapResults?.readiness || 45);
+  const [baseReadiness, setBaseReadiness] = useState(savedGapResults?.readiness ?? (isDemo ? 45 : 0));
   const [dragOver, setDragOver] = useState(false);
   const [selectedPacing, setSelectedPacing] = useState(committedPath?.pacing || 'balanced');
   const [expandedMilestone, setExpandedMilestone] = useState(0);

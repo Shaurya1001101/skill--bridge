@@ -1138,7 +1138,7 @@ export default function SkillAssessmentPage() {
                   <div>
                     <h3 className="card-title">Recommended Milestone Curriculum</h3>
                     <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                      Personalized to close identified gaps: {(gapResults?.gaps || []).slice(0, 4).join(', ') || 'PyTorch, MLOps, Docker'}
+                      Personalized to close identified gaps: {(gapResults?.gaps || []).length > 0 ? (gapResults.gaps.slice(0, 4).join(', ')) : activeRoleData.skills.slice(0, 4).map(s => typeof s === 'string' ? s : s.name).join(', ')}
                     </p>
                   </div>
                   <button
@@ -1154,7 +1154,7 @@ export default function SkillAssessmentPage() {
                 </div>
 
                 {/* Interactive Learning Modules for Top Gaps */}
-                <SkillResourceModules gapSkills={gapResults?.gaps || ['PyTorch', 'MLOps', 'Docker']} />
+                <SkillResourceModules gapSkills={(gapResults?.gaps || []).length > 0 ? gapResults.gaps : activeRoleData.skills.slice(0, 4).map(s => typeof s === 'string' ? s : s.name)} />
               </div>
             </div>
           )}

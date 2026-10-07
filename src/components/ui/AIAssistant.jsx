@@ -3,10 +3,27 @@ import { Bot, MessageCircle } from 'lucide-react';
 import useStore from '../../store/useStore.js';
 import { SKILL_ROLES, PACING_MODES, getSkillResources } from '../../lib/data.js';
 import { apiUrl, apiFetch } from '../../lib/api.js';
+import { chatAgent } from '../../lib/aiEngine.js';
 
 // ─── Contextual Rule-Based & Live AI Engine ──────────────────────────────────
 export function contextualAIResponse(question, ctx = {}) {
   const q = question.toLowerCase();
+
+  // 0. Grounded Chatbot Tools from skill_bridge_final_chatbot
+  if (/recommend|job|opening|hiring|vacanc|role|gap|readiness|road ?map|course|tutorial|trend|market|city/i.test(q)) {
+    try {
+      const agentRes = chatAgent(question, {
+        skills: ctx.userSkills?.all || [],
+        userSkills: ctx.userSkills,
+        targetRole: ctx.roleName,
+        city: ctx.city || '',
+      });
+      if (agentRes?.reply) return agentRes.reply;
+    } catch {
+      // Fall through to domain rules below
+    }
+  }
+
   const userName = ctx.user?.name || 'Learner';
   const roleName = ctx.roleName || 'Machine Learning Engineer';
   const pacingName = ctx.pacingName || 'Balanced';
@@ -117,6 +134,7 @@ export function AIAssistant() {
   const nextTask = (committedPath?.tasks || []).find(t => !completedIds.includes(t.id));
   const topGaps = gapResults?.gaps || ['PyTorch', 'MLOps', 'Docker'];
 
+  const userSkills = useStore(s => s.userSkills);
   const aiContext = {
     user,
     roleName,
@@ -124,6 +142,7 @@ export function AIAssistant() {
     hoursPerDay: currentPacing.hoursPerDay,
     nextTask,
     topGaps,
+    userSkills: userSkills || { all: [] },
     xp,
     streak,
     completedTasksCount: completedIds.length,
@@ -131,14 +150,14 @@ export function AIAssistant() {
   };
 
   const QUICK_PROMPTS = [
+    '💼 Recommend matching jobs',
+    '🔍 Analyze my skill gap',
+    '🗺️ Generate career roadmap',
+    '📚 Recommend free courses',
+    '📊 Indian tech market trends',
     '🎯 What should I do today?',
-    '💡 Explain my top skill gap',
     '⚙️ MLOps Pipeline Guide',
     '🤖 Explain RAG & LLMs',
-    '🧠 PyTorch Autograd Mechanics',
-    '⚡ Distributed Spark & Kafka',
-    '🏛️ ML System Design Framework',
-    '📊 A/B Testing & Statistics',
     '⚡ How do I adjust my pace?',
   ];
 

@@ -18,6 +18,7 @@ import {
   isSupabaseConfigured,
   SUPABASE_URL,
 } from './supabaseClient.js';
+import { chatAgent } from './aiEngine.js';
 
 /**
  * Resolves the API base URL.
@@ -139,17 +140,34 @@ export async function apiFetch(endpoint, options = {}) {
       });
     }
     // GET profile
+    if (userId === '1' || userId === 1 || userId === 'demo') {
+      return new Response(
+        JSON.stringify({
+          profile: {
+            id: 1,
+            email: 'user@skillbridge.io',
+            name: 'Alex Mercer',
+            role: 'User',
+            xp: 75,
+            streak: 5,
+            targetRole: 'data-scientist',
+            skills: { all: ['Python', 'SQL', 'Git'] },
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
     return new Response(
       JSON.stringify({
         profile: {
-          id: userId || 1,
-          email: 'user@skillbridge.io',
-          name: 'Alex Mercer',
-          role: 'User',
-          xp: 75,
-          streak: 5,
-          targetRole: 'data-scientist',
-          skills: { all: ['Python', 'SQL', 'Git'] },
+          id: userId || 'guest',
+          email: `${userId || 'guest'}@skillbridge.io`,
+          name: userId === 'guest' ? 'Guest Engineer' : 'New Engineer',
+          role: userId === 'guest' ? 'Guest' : 'User',
+          xp: 0,
+          streak: 1,
+          targetRole: 'ml-engineer',
+          skills: { all: [] },
         },
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -191,6 +209,15 @@ export async function apiFetch(endpoint, options = {}) {
   if (norm.startsWith('/api/datascience-jobs/salary-insights')) {
     const insights = await supabaseFetchSalaryInsights();
     return new Response(JSON.stringify(insights), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Endpoint: /api/ai
+  if (norm.startsWith('/api/ai')) {
+    const aiResult = chatAgent(bodyData.message, bodyData.context || {});
+    return new Response(JSON.stringify(aiResult), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

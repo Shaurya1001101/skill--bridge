@@ -230,12 +230,11 @@ export function generatePathSchedule(roleKey = 'ml-engineer', pacingKey = 'balan
   };
 }
 
-export function getDefaultCommittedPath() {
-  const defaultPath = generatePathSchedule('ml-engineer', 'balanced');
-  // Mark the first 2 tasks completed by default for an engaging starting state
+export function getDefaultCommittedPath(roleKey = 'data-scientist', pacingKey = 'balanced') {
+  const defaultPath = generatePathSchedule(roleKey, pacingKey);
   return {
     ...defaultPath,
-    completedTaskIds: [defaultPath.tasks[0]?.id, defaultPath.tasks[1]?.id].filter(Boolean),
+    completedTaskIds: [],
   };
 }
 

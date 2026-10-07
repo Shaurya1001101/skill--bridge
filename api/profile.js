@@ -44,16 +44,54 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, message: 'Profile synced with Supabase' });
   }
 
+  if (supabaseKey && userId && userId !== 'guest' && userId !== '1' && userId !== 1) {
+    try {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      const { data: p } = await supabase.from('user_profiles').select('*').eq('user_id', Number(userId)).single();
+      if (p) {
+        return res.status(200).json({
+          profile: {
+            id: userId,
+            role: 'User',
+            xp: p.xp ?? 0,
+            streak: p.streak || 1,
+            targetRole: p.target_role || 'ml-engineer',
+            skills: p.skills_json || { all: [] },
+          },
+        });
+      }
+    } catch {
+      // Fall through
+    }
+  }
+
+  // Demo user Alex Mercer
+  if (userId === '1' || userId === 1 || userId === 'demo') {
+    return res.status(200).json({
+      profile: {
+        id: 1,
+        email: 'user@skillbridge.io',
+        name: 'Alex Mercer',
+        role: 'User',
+        xp: 75,
+        streak: 5,
+        targetRole: 'data-scientist',
+        skills: { all: ['Python', 'SQL', 'Git'] },
+      },
+    });
+  }
+
+  // New user or guest default
   return res.status(200).json({
     profile: {
-      id: userId || 1,
-      email: 'user@skillbridge.io',
-      name: 'Alex Mercer',
-      role: 'User',
-      xp: 75,
-      streak: 5,
-      targetRole: 'data-scientist',
-      skills: { all: ['Python', 'SQL', 'Git'] },
+      id: userId || 'guest',
+      email: `${userId || 'guest'}@skillbridge.io`,
+      name: userId === 'guest' ? 'Guest Engineer' : 'New Engineer',
+      role: userId === 'guest' ? 'Guest' : 'User',
+      xp: 0,
+      streak: 1,
+      targetRole: 'ml-engineer',
+      skills: { all: [] },
     },
   });
 }
