@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Sun, Moon, Lock, X, Check, CheckCircle2
+  Sun, Moon, Lock, X, Check, CheckCircle2, RefreshCw, Database
 } from 'lucide-react';
 import useStore from '../store/useStore.js';
-import { apiUrl } from '../lib/api.js';
+import { apiUrl, apiFetch, checkBackendHealth } from '../lib/api.js';
 
 const DEMO_USER = { email: 'alex@skillbridge.io', password: 'demo-password', name: 'Alex Mercer' };
 
@@ -56,6 +56,27 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Live Supabase Backend Connectivity State
+  const [dbHealth, setDbHealth] = useState({ checking: true, online: false, database: 'checking', latencyMs: null, error: null });
+
+  const verifyConnection = useCallback(async () => {
+    setDbHealth(prev => ({ ...prev, checking: true }));
+    const health = await checkBackendHealth();
+    setDbHealth({
+      checking: false,
+      online: health.online,
+      database: health.database,
+      latencyMs: health.latencyMs,
+      error: health.error,
+    });
+  }, []);
+
+  useEffect(() => {
+    verifyConnection();
+    const interval = setInterval(verifyConnection, 20000);
+    return () => clearInterval(interval);
+  }, [verifyConnection]);
+
   // Forgot Password State
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -73,7 +94,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch(apiUrl('/api/auth'), {
+      const res = await apiFetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'demo' })
@@ -116,7 +137,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(apiUrl('/api/auth'), {
+      const res = await apiFetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'login', identifier: userIdentifier, password })
@@ -131,8 +152,8 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-    } catch {
-      setError('Cannot connect to backend server. Please verify backend is running on port 5000 so credentials can be validated against Supabase.');
+    } catch (fetchErr) {
+      setError(`Cannot connect to backend server (${fetchErr.message}). Please verify backend is running on port 5000 so credentials can be validated against Supabase.`);
     }
     setLoading(false);
   };
@@ -159,7 +180,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(apiUrl('/api/auth'), {
+      const res = await apiFetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -180,8 +201,8 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-    } catch {
-      setError('Cannot connect to backend server. Please verify backend is running on port 5000 so your account can be created in Supabase.');
+    } catch (fetchErr) {
+      setError(`Cannot connect to backend server (${fetchErr.message}). Please verify backend is running on port 5000 so your account can be created in Supabase.`);
     }
     setLoading(false);
   };
@@ -313,6 +334,74 @@ export default function LoginPage() {
                 </span>
               </div>
               <span className="guest-tab-arrow">→</span>
+            </button>
+          </div>
+
+          {/* Live Supabase Backend Connectivity Status Badge */}
+          <div
+            id="backend-connection-badge"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 12px',
+              margin: '12px 0 16px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              border: dbHealth.online ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
+              background: dbHealth.online ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+              color: 'var(--text-1)',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  width: '9px',
+                  height: '9px',
+                  borderRadius: '50%',
+                  backgroundColor: dbHealth.checking ? '#eab308' : dbHealth.online ? '#10b981' : '#ef4444',
+                  boxShadow: dbHealth.online ? '0 0 8px #10b981' : 'none',
+                  display: 'inline-block',
+                  flexShrink: 0
+                }}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+                <span style={{ fontWeight: 600, color: dbHealth.online ? '#10b981' : '#ef4444' }}>
+                  {dbHealth.checking
+                    ? 'Pinging Supabase backend...'
+                    : dbHealth.online
+                    ? 'Supabase PostgreSQL Connected'
+                    : 'Backend Server Unreachable'}
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                  {dbHealth.online
+                    ? `Live on port 5000 · Latency ${dbHealth.latencyMs ? `${dbHealth.latencyMs}ms` : '<10ms'}`
+                    : 'Run "npm run dev" · Listening on port 5000'}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="recheck-connection-btn"
+              onClick={verifyConnection}
+              disabled={dbHealth.checking}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                color: 'var(--text-2)',
+                padding: '4px 8px',
+                fontSize: '11px',
+                cursor: dbHealth.checking ? 'not-allowed' : 'pointer',
+              }}
+              title="Test Supabase connection again"
+            >
+              <RefreshCw size={12} className={dbHealth.checking ? 'spin' : ''} />
+              <span>{dbHealth.checking ? 'Testing' : 'Verify'}</span>
             </button>
           </div>
 

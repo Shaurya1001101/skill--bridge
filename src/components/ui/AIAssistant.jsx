@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Bot, MessageCircle } from 'lucide-react';
 import useStore from '../../store/useStore.js';
 import { SKILL_ROLES, PACING_MODES, getSkillResources } from '../../lib/data.js';
-import { apiUrl } from '../../lib/api.js';
+import { apiUrl, apiFetch } from '../../lib/api.js';
 
 // ─── Contextual Rule-Based & Live AI Engine ──────────────────────────────────
 export function contextualAIResponse(question, ctx = {}) {
@@ -153,7 +153,7 @@ export function AIAssistant() {
     const timeoutId = setTimeout(() => controller.abort(), 6500);
 
     try {
-      const res = await fetch(apiUrl('/api/ai'), {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg, context: aiContext }),

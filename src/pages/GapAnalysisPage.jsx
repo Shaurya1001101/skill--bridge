@@ -138,8 +138,16 @@ export default function GapAnalysisPage() {
             <div className="form-group">
               <label className="form-label">Target Role</label>
               <select id="target-role-gap" className="form-select" value={targetRole} onChange={e => setTargetRole(e.target.value)}>
-                {Object.entries(SKILL_ROLES).map(([k, v]) => (
-                  <option key={k} value={k}>{v.name}</option>
+                {['Data Science & AI', 'Data Engineering', 'Analytics & BI', 'Cloud & Infrastructure', 'Software & Engineering'].map(cat => (
+                  <optgroup key={cat} label={`── ${cat} ──`}>
+                    {Object.entries(SKILL_ROLES)
+                      .filter(([_, v]) => v.category === cat)
+                      .map(([k, v]) => (
+                        <option key={k} value={k}>
+                          {v.name} ({v.avgSalary})
+                        </option>
+                      ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

@@ -334,10 +334,16 @@ export default function DashboardPage() {
               cursor: 'pointer'
             }}
           >
-            {Object.entries(SKILL_ROLES).map(([key, r]) => (
-              <option key={key} value={key}>
-                🎯 {r.name}
-              </option>
+            {['Data Science & AI', 'Data Engineering', 'Analytics & BI', 'Cloud & Infrastructure', 'Software & Engineering'].map(cat => (
+              <optgroup key={cat} label={`── ${cat} ──`}>
+                {Object.entries(SKILL_ROLES)
+                  .filter(([_, v]) => v.category === cat)
+                  .map(([key, r]) => (
+                    <option key={key} value={key}>
+                      🎯 {r.name} ({r.avgSalary})
+                    </option>
+                  ))}
+              </optgroup>
             ))}
           </select>
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import storage, { getDefaultCommittedPath, generatePathSchedule } from '../lib/storage.js';
-import { apiUrl } from '../lib/api.js';
+import { apiUrl, apiFetch } from '../lib/api.js';
 
 const useStore = create((set, get) => ({
   // ─── Safety Scale (100% default scale, optional 90% view toggle) ────────
@@ -114,7 +114,7 @@ const useStore = create((set, get) => ({
     const user = get().user;
     if (!user?.id) return;
     try {
-      await fetch(apiUrl('/api/profile'), {
+      await apiFetch('/api/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +166,7 @@ const useStore = create((set, get) => ({
     const user = get().user;
     if (user?.id) {
       try {
-        await fetch(apiUrl('/api/path'), {
+        await apiFetch('/api/path', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ const useStore = create((set, get) => ({
     const user = get().user;
     if (user?.id) {
       try {
-        await fetch(apiUrl('/api/path'), {
+        await apiFetch('/api/path', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

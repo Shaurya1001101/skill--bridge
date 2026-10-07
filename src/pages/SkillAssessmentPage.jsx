@@ -340,27 +340,56 @@ export default function SkillAssessmentPage() {
           </p>
         </div>
 
-        {/* Global Active Role Switcher */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>Target Role:</span>
-          <select
-            className="form-select"
-            style={{ width: 'auto', minWidth: 200, padding: '6px 12px', fontSize: 13 }}
-            value={targetRole}
-            onChange={(e) => {
-              const newRole = e.target.value;
-              setTargetRole(newRole);
-              if (editableSkills.length > 0) {
-                updateMatchScores(editableSkills, newRole);
-              } else if (Object.keys(ratings).length > 0) {
-                computeAndSaveGap(ratings, newRole);
-              }
-            }}
-          >
-            {Object.entries(SKILL_ROLES).map(([k, v]) => (
-              <option key={k} value={k}>{v.name}</option>
-            ))}
-          </select>
+        {/* Global Active Role Switcher with Category Optgroups */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>Target Role:</span>
+            <select
+              className="form-select"
+              style={{
+                width: 'auto',
+                minWidth: 260,
+                padding: '7px 12px',
+                fontSize: 13,
+                fontWeight: 600,
+                borderRadius: 10,
+                background: 'var(--field)',
+                border: '1px solid var(--line)',
+                color: 'var(--ink)'
+              }}
+              value={targetRole}
+              onChange={(e) => {
+                const newRole = e.target.value;
+                setTargetRole(newRole);
+                if (editableSkills.length > 0) {
+                  updateMatchScores(editableSkills, newRole);
+                } else if (Object.keys(ratings).length > 0) {
+                  computeAndSaveGap(ratings, newRole);
+                }
+              }}
+            >
+              {['Data Science & AI', 'Data Engineering', 'Analytics & BI', 'Cloud & Infrastructure', 'Software & Engineering'].map(cat => (
+                <optgroup key={cat} label={`── ${cat} ──`}>
+                  {Object.entries(SKILL_ROLES)
+                    .filter(([_, v]) => v.category === cat)
+                    .map(([k, v]) => (
+                      <option key={k} value={k}>
+                        {v.name} ({v.avgSalary})
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          {activeRoleData && (
+            <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--text-muted)', alignItems: 'center' }}>
+              <span style={{ background: 'rgba(20, 160, 152, 0.12)', color: 'var(--teal)', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>
+                {activeRoleData.category}
+              </span>
+              <span>💰 {activeRoleData.avgSalary}</span>
+              <span>💼 {activeRoleData.openings ? `${activeRoleData.openings.toLocaleString()} Openings` : 'High Demand'}</span>
+            </div>
+          )}
         </div>
       </div>
 
