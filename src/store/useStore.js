@@ -11,6 +11,17 @@ const useStore = create((set, get) => ({
     set({ safetyScale: next });
   },
 
+  // ─── Sidebar Navigation & Drawer State ──────────────────────────────────
+  sidebarCollapsed: storage.get('sidebarCollapsed', false),
+  toggleSidebar: () => {
+    const next = !get().sidebarCollapsed;
+    storage.set('sidebarCollapsed', next);
+    set({ sidebarCollapsed: next });
+  },
+  mobileSidebarOpen: false,
+  toggleMobileSidebar: () => set(s => ({ mobileSidebarOpen: !s.mobileSidebarOpen })),
+  closeMobileSidebar: () => set({ mobileSidebarOpen: false }),
+
   // ─── Auth & User Session ────────────────────────────────────────────────
   user: storage.get('user', null),
   setUser: (user) => {

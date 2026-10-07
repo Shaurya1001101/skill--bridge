@@ -1,523 +1,914 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BarChart2, TrendingUp, AlertTriangle, Users, ArrowRight,
-  Newspaper, Lightbulb, Star, Trophy, Zap, BookOpen,
-  CheckCircle2, Compass, Sparkles, ChevronDown, ChevronUp
+  TrendingUp, BookOpen, Compass, ChevronDown, ChevronUp, Sparkles,
+  ExternalLink, Check, Clock, Award, Code2, Database, Layers,
+  Calendar, Info, X, Target, Zap, ArrowRight, ShieldCheck, Flame,
+  Terminal, CheckCircle2, AlertTriangle, Plus, PlayCircle, MapPin
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 
 import useStore from '../store/useStore.js';
-import { PEER_PROFILES, TREND_DATA, STATIC_NEWS_FALLBACK, VIDEO_LIBRARY, SKILL_ROLES } from '../lib/data.js';
-import { computeReadiness, rankVideosForGaps } from '../lib/storage.js';
-import { apiUrl } from '../lib/api.js';
+import { PEER_PROFILES, TREND_DATA, SKILL_ROLES } from '../lib/data.js';
 import CuratedLearningAndNewsFeed from '../components/ui/CuratedLearningAndNewsFeed.jsx';
 
-// ─── Compact KPI Card ────────────────────────────────────────────────────────
-function ConsolidatedKPICard({ title, value, subtitle, badge, badgeColor, icon: Icon, onClick, ctaText }) {
-  return (
-    <div
-      className="card kpi-consolidated-card"
-      onClick={onClick}
-      style={{
-        cursor: onClick ? 'pointer' : 'default',
-        padding: '16px 18px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        position: 'relative',
-        overflow: 'hidden',
-        transition: 'all 0.2s ease',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>
-          {title}
-        </span>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'var(--bg-subtle, rgba(255,255,255,0.06))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--brand)',
-            flexShrink: 0,
-          }}
-        >
-          <Icon size={16} />
-        </div>
-      </div>
+// ─── Ticking Countdown to Midnight Hook ─────────────────────────────────────
+function useCountdownToMidnight() {
+  const [time, setTime] = useState({ hours: '06', minutes: '22', seconds: '58' });
 
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-        <span style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', fontFamily: 'var(--font-display, inherit)' }}>
-          {value}
-        </span>
-        {badge && (
-          <span
-            className="badge"
-            style={{
-              background: badgeColor ? `${badgeColor}18` : 'rgba(59,130,246,0.15)',
-              color: badgeColor || 'var(--brand-light)',
-              fontSize: 10,
-              fontWeight: 700,
-              padding: '2px 7px',
-            }}
-          >
-            {badge}
-          </span>
-        )}
-      </div>
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      const diff = Math.max(0, endOfDay - now);
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
-          {subtitle}
-        </span>
-        {ctaText && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 2 }}>
-            {ctaText} →
-          </span>
-        )}
-      </div>
-    </div>
-  );
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTime({
+        hours: String(h).padStart(2, '0'),
+        minutes: String(m).padStart(2, '0'),
+        seconds: String(s).padStart(2, '0'),
+      });
+    };
+
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return time;
 }
 
-// ─── Compact Auto-Scrolling Market Pulse Ticker ─────────────────────────────
-function CompactMarketTicker() {
-  const navigate = useNavigate();
-  const TICKER = [
-    'LinkedIn Hiring Index: 142,850+ Open Roles (+14.2% MoM)',
-    'Top Rising Skills: LangChain, PyTorch & MLOps (+312% YoY)',
-    'Median GenAI Salary: ₹28.5L–₹45L LPA',
-    'MLOps Engineer Velocity: Up 28% YoY',
-    'Python: #1 Most Demanded Language for 12 Consecutive Years',
-    'Cloud AI Demand: +110.8% MoM Surge in Bengaluru',
-  ];
+// ─── 4-Phase Structured Curriculum Roadmaps by Role ─────────────────────────
+const ROLE_CURRICULA = {
+  'ml-engineer': [
+    {
+      phase: 1,
+      title: 'Python Core & Algorithmic Foundations',
+      hours: '24 hrs',
+      status: 'completed',
+      topics: ['Python OOP & Metaprogramming', 'Vectorization with NumPy', 'Time & Space Complexity', 'Algorithmic Drills']
+    },
+    {
+      phase: 2,
+      title: 'Deep Learning & Neural Architectures',
+      hours: '32 hrs',
+      status: 'in-progress',
+      topics: ['PyTorch Tensors & Autograd', 'CNN & Transformer Backbones', 'Loss Functions & Optimization', 'Hyperparameter Tuning']
+    },
+    {
+      phase: 3,
+      title: 'MLOps, Packaging & Containerization',
+      hours: '28 hrs',
+      status: 'upcoming',
+      topics: ['Docker Multi-Stage Builds', 'FastAPI Inference Endpoints', 'Model Registries & Artifacts', 'CI/CD Automated Testing']
+    },
+    {
+      phase: 4,
+      title: 'Distributed Inference & Production Scale',
+      hours: '30 hrs',
+      status: 'upcoming',
+      topics: ['Kubernetes Deployment Manifests', 'Prometheus & Grafana Telemetry', 'Triton / ONNX Acceleration', 'Live System Benchmark']
+    }
+  ],
+  'data-engineer': [
+    {
+      phase: 1,
+      title: 'Relational Schemas & Advanced SQL',
+      hours: '20 hrs',
+      status: 'completed',
+      topics: ['Window Functions & CTEs', 'B-Tree & Hash Index Optimization', 'ACID Transactions & Locks', 'Schema Normalization']
+    },
+    {
+      phase: 2,
+      title: 'Distributed Data Processing with Spark',
+      hours: '30 hrs',
+      status: 'in-progress',
+      topics: ['PySpark RDDs & DataFrames', 'Shuffle & Partition Tuning', 'Batch ETL Pipelines', 'Delta Lake Architecture']
+    },
+    {
+      phase: 3,
+      title: 'Pipeline Orchestration & Streaming',
+      hours: '26 hrs',
+      status: 'upcoming',
+      topics: ['Apache Airflow DAG Authoring', 'Kafka Pub/Sub Event Streaming', 'Schema Registries (Avro)', 'Data Quality Checks (Great Expectations)']
+    },
+    {
+      phase: 4,
+      title: 'Cloud Warehousing & Analytics Scale',
+      hours: '28 hrs',
+      status: 'upcoming',
+      topics: ['Snowflake / BigQuery Partitioning', 'dbt Data Modeling & Tests', 'Cost & Query Profiling', 'Production Warehouse Benchmark']
+    }
+  ],
+  'mlops-engineer': [
+    {
+      phase: 1,
+      title: 'Linux Systems & Cloud Infrastructure',
+      hours: '22 hrs',
+      status: 'completed',
+      topics: ['Shell Scripting & Permissions', 'Network Sockets & DNS', 'AWS/GCP IAM & VPC Networking', 'Terraform Basics']
+    },
+    {
+      phase: 2,
+      title: 'Containerization & Microservices',
+      hours: '28 hrs',
+      status: 'in-progress',
+      topics: ['Docker Security & Layer Caching', 'Docker Compose Multi-Container', 'FastAPI & gRPC Protocol', 'Automated Health Probes']
+    },
+    {
+      phase: 3,
+      title: 'Kubernetes & Workflow Automation',
+      hours: '34 hrs',
+      status: 'upcoming',
+      topics: ['K8s Pods, Deployments & Services', 'Helm Charts Packaging', 'GitHub Actions CI/CD', 'Argo Workflows / Kubeflow']
+    },
+    {
+      phase: 4,
+      title: 'Model Observability & Drift Detection',
+      hours: '26 hrs',
+      status: 'upcoming',
+      topics: ['Evidently AI Drift Metrics', 'Prometheus Metrics Scraping', 'Grafana Alerting Rules', 'Production SLA Benchmark']
+    }
+  ],
+  'data-scientist': [
+    {
+      phase: 1,
+      title: 'Mathematical Statistics & EDA',
+      hours: '20 hrs',
+      status: 'completed',
+      topics: ['Probability Distributions & Z-Scores', 'Hypothesis Testing & p-values', 'Pandas Data Wrangling', 'Seaborn & Plotly Visualization']
+    },
+    {
+      phase: 2,
+      title: 'Predictive Modeling & Scikit-Learn',
+      hours: '30 hrs',
+      status: 'in-progress',
+      topics: ['Regularized Regression & Logistic', 'Tree Ensembles (XGBoost, LightGBM)', 'Feature Engineering & Imputation', 'Cross-Validation & ROC-AUC']
+    },
+    {
+      phase: 3,
+      title: 'Unsupervised Learning & NLP Foundations',
+      hours: '24 hrs',
+      status: 'upcoming',
+      topics: ['K-Means & DBSCAN Clustering', 'PCA & Dimensionality Reduction', 'TF-IDF & Embeddings', 'Topic Modeling & Semantic Search']
+    },
+    {
+      phase: 4,
+      title: 'Business A/B Testing & Production Impact',
+      hours: '22 hrs',
+      status: 'upcoming',
+      topics: ['Sample Size & Power Analysis', 'Causal Inference & Synthetic Controls', 'Streamlit Dashboard Apps', 'Executive Metric Presentation']
+    }
+  ]
+};
 
-  return (
-    <div className="compact-market-pulse-bar" style={{ marginBottom: 18 }}>
-      <div className="pulse-tag">
-        <span className="pulse-ping" />
-        <span>Market Pulse</span>
-      </div>
-      <div className="pulse-track-window">
-        <div className="pulse-track-slider">
-          {[...TICKER, ...TICKER].map((t, i) => (
-            <span key={i} className="pulse-item">
-              {t}
-              <span className="pulse-sep">·</span>
-            </span>
-          ))}
-        </div>
-      </div>
-      <button
-        type="button"
-        className="pulse-action-link"
-        onClick={() => navigate('/jobs')}
-      >
-        Jobs →
-      </button>
-    </div>
-  );
-}
-
-// ─── Peer Benchmarks ─────────────────────────────────────────────────────────
-function PeerBenchmarks() {
-  const role = SKILL_ROLES['ml-engineer'];
-  const peers = PEER_PROFILES.slice(0, 4).map(p => ({
-    ...p, score: computeReadiness(p.skills, role),
-  })).sort((a, b) => b.score - a.score);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {peers.map(p => {
-        const col = p.score >= 80 ? 'var(--success)' : p.score >= 65 ? 'var(--warning)' : 'var(--info)';
-        return (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 30, height: 30, borderRadius: 6, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-              {p.name.charAt(0)}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{p.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{p.currentRole}</div>
-            </div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: col, fontFamily: 'var(--font-display)' }}>{p.score}%</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Trend Chart ─────────────────────────────────────────────────────────────
-function TrendChart() {
-  const datasets = TREND_DATA['ai-ml'];
-  const data = TREND_DATA.labels.map((label, i) => {
-    const point = { label };
-    datasets.forEach(ds => { point[ds.name] = ds.data[i]; });
-    return point;
-  });
-
-  return (
-    <ResponsiveContainer width="100%" height={180}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-        <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} />
-        <YAxis tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} unit="%" />
-        <Tooltip
-          contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12 }}
-          labelStyle={{ color: 'var(--text)' }}
-        />
-        {datasets.map(ds => (
-          <Line key={ds.name} type="monotone" dataKey={ds.name} stroke={ds.color} strokeWidth={2} dot={false} />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
-  );
-}
-
-// ─── Main Dashboard Page ─────────────────────────────────────────────────────
 export default function DashboardPage() {
   const navigate = useNavigate();
   const user = useStore(s => s.user);
   const gapResults = useStore(s => s.gapResults);
   const xp = useStore(s => s.xp);
   const streak = useStore(s => s.streak);
+  const addXp = useStore(s => s.addXp);
+  const addToast = useStore(s => s.addToast);
   const solvedProblems = useStore(s => s.solvedProblems);
   const targetRole = useStore(s => s.targetRole) || 'ml-engineer';
+  const setTargetRole = useStore(s => s.setTargetRole);
 
+  const [mounted, setMounted] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [showEvidenceModal, setShowEvidenceModal] = useState(false);
+  const [matrixFilter, setMatrixFilter] = useState('gaps'); // 'gaps' | 'all' | 'ready'
+  const [expandedPhase, setExpandedPhase] = useState(2);
+  const [newCustomTask, setNewCustomTask] = useState('');
+  const [showAddTask, setShowAddTask] = useState(false);
+
+  // Interactive Daily Practice Plan
+  const [dailyTasks, setDailyTasks] = useState([
+    { id: 1, text: 'Solve Daily Problem: Reverse Linked List II', xp: 20, done: false, link: '/daily-problem' },
+    { id: 2, text: 'Run MLOps Docker Containerization Lab', xp: 15, done: false, link: '/code-labs' },
+    { id: 3, text: 'Review SQL Window Functions Cheat Sheet', xp: 10, done: true, link: '/code-labs' },
+  ]);
+
+  const countdown = useCountdownToMidnight();
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 25);
+    return () => clearTimeout(t);
+  }, []);
 
   const isDemo = user?.email === 'user@skillbridge.io';
-  const hasAnalysis = Boolean(gapResults);
-  const gapSkills = gapResults?.gaps || (isDemo ? ['MLOps', 'PyTorch', 'Docker', 'Kubernetes'] : []);
-  const readiness = gapResults?.readiness !== undefined ? gapResults.readiness : isDemo ? 67 : 0;
   const targetRoleObj = SKILL_ROLES[targetRole] || SKILL_ROLES['ml-engineer'];
+  const gapSkills = gapResults?.gaps || (isDemo ? ['Docker', 'PyTorch', 'MLOps', 'Kubernetes'] : ['Docker', 'Kubernetes']);
+
+  // FIX: Safely normalize skills from targetRoleObj.skills (can be array of objects or strings)
+  const allRoleSkills = (targetRoleObj.skills || []).map(s => {
+    if (typeof s === 'string') return { name: s, weight: 0.15, required: 3 };
+    return { name: s.name, weight: s.weight ?? 0.15, required: s.required ?? 3 };
+  });
+
+  // Build matrix list where item.skill is STRICTLY guaranteed to be a string name
+  const matrixList = allRoleSkills.map(skObj => {
+    const skillName = skObj.name;
+    const isGap = gapSkills.includes(skillName);
+    let evidence = isGap ? 'Claimed' : 'Tested';
+    let weight = skObj.weight >= 0.15 ? 'Core' : skObj.weight >= 0.10 ? 'High' : 'Medium';
+    let pct = isGap ? 25 : 100;
+
+    if (skillName === 'Docker' || skillName === 'PyTorch') {
+      evidence = 'Claimed';
+      pct = 25;
+    } else if (skillName === 'MLOps' || skillName === 'Kubernetes') {
+      evidence = 'Quizzed';
+      pct = 60;
+    } else if (skillName === 'Python' || skillName === 'SQL' || skillName === 'Git') {
+      evidence = 'Tested';
+      pct = 100;
+    }
+
+    return {
+      skill: skillName, // Strictly string
+      isGap,
+      evidence,
+      weight,
+      pct,
+      required: skObj.required
+    };
+  });
+
+  const filteredMatrix = matrixList.filter(item => {
+    if (matrixFilter === 'gaps') return item.isGap;
+    if (matrixFilter === 'ready') return !item.isGap;
+    return true; // 'all' filter shows all items without crashing
+  });
+
+  const topGap = gapSkills[0] || 'Docker';
+  const phases = ROLE_CURRICULA[targetRole] || ROLE_CURRICULA['ml-engineer'];
+
+  // Dynamic time-of-day greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = user?.name ? user.name.split(' ')[0] : 'Alex';
+    if (hour < 12) return `Good morning, ${name} ☕`;
+    if (hour < 17) return `Good afternoon, ${name} ☀️`;
+    return `Good evening, ${name} 🌙`;
+  };
+
+  const handleToggleTask = (task) => {
+    setDailyTasks(prev => prev.map(t => {
+      if (t.id === task.id) {
+        const nextDone = !t.done;
+        if (nextDone) {
+          addXp(t.xp);
+          addToast(`Task completed! +${t.xp} XP added to your streak.`, 'success');
+        }
+        return { ...t, done: nextDone };
+      }
+      return t;
+    }));
+  };
+
+  const handleAddCustomTask = (e) => {
+    e.preventDefault();
+    if (!newCustomTask.trim()) return;
+    const newTask = {
+      id: Date.now(),
+      text: newCustomTask.trim(),
+      xp: 15,
+      done: false,
+    };
+    setDailyTasks(prev => [...prev, newTask]);
+    setNewCustomTask('');
+    setShowAddTask(false);
+    addToast('Custom practice task added to your plan.', 'info');
+  };
 
   return (
-    <div className="dashboard-page-container">
-      {/* ─── Hero Header ──────────────────────────────────────────────────────── */}
-      <div className="page-header" style={{ marginBottom: 14 }}>
-        <div>
-          <h1 className="page-title" style={{ margin: 0 }}>
-            Welcome back, {user?.name || 'Developer'} 👋
-          </h1>
-          <p className="page-subtitle" style={{ margin: '4px 0 0 0' }}>
-            Target Role: <strong style={{ color: 'var(--text)' }}>{targetRoleObj.name}</strong> · AI Skill Diagnostic & Learning Roadmap
-          </p>
+    <div className={`sb-dashboard ${mounted ? 'is-mounted' : ''}`}>
+
+      {/* ─── 1. Header & Role Selector Bar (Readiness Display Removed) ─── */}
+      <div className="sb-dash-header">
+        <div className="sb-dash-title-wrap">
+          <h1 className="sb-dash-title">{getGreeting()}</h1>
+          <div className="sb-dash-subtitle">
+            <span>Targeting:</span>
+            <div className="sb-dash-target-pill">
+              <Target size={12} />
+              <span>{targetRoleObj.name}</span>
+            </div>
+            <span style={{ color: 'var(--text-subtle)' }}>·</span>
+            <span style={{ color: 'var(--brand-light)', fontWeight: 600 }}>
+              {gapSkills.length} Priority Skill Gaps
+            </span>
+            <span style={{ color: 'var(--text-subtle)' }}>·</span>
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() => setShowEvidenceModal(true)}
+              style={{ fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+            >
+              <Info size={12} /> Evidence Verification Guide
+            </button>
+          </div>
         </div>
-        <div className="header-actions">
+
+        <div className="sb-dash-header-actions">
+          {/* Target Role Selector Dropdown */}
+          <select
+            className="form-select"
+            value={targetRole}
+            onChange={e => setTargetRole(e.target.value)}
+            style={{
+              padding: '6px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              color: 'var(--text)',
+              cursor: 'pointer'
+            }}
+          >
+            {Object.entries(SKILL_ROLES).map(([key, r]) => (
+              <option key={key} value={key}>
+                🎯 {r.name}
+              </option>
+            ))}
+          </select>
+
           <button
-            className="btn btn-secondary"
+            type="button"
+            className="btn btn-secondary btn-sm"
             onClick={() => navigate('/assessment?stage=analyze')}
           >
-            Analyze Resume
+            Upload Résumé
           </button>
+
           <button
-            className="btn btn-primary"
+            type="button"
+            className="btn btn-primary btn-sm"
             onClick={() => navigate('/assessment?stage=gap')}
           >
-            Skill Assessment →
+            Skill Diagnostics →
           </button>
         </div>
       </div>
 
-      {/* ─── Compact Live Market Pulse Ticker ──────────────────────────────────── */}
-      <CompactMarketTicker />
+      {/* ─── 2. Spotlight Practice Focus Hero Card (Readiness Score Removed) ─── */}
+      <div className="sb-spotlight-card">
+        <div className="sb-spotlight-badge">
+          <Sparkles size={12} />
+          <span>Priority Practice Focus</span>
+        </div>
 
-      {/* ─── Single Consolidated Row of Key Metrics (Zero Duplication) ───────── */}
-      <div className="kpi-consolidated-grid" style={{ marginBottom: 20 }}>
-        {/* 1. AI Readiness */}
-        <ConsolidatedKPICard
-          title="AI Role Readiness"
-          value={`${readiness}%`}
-          subtitle={hasAnalysis ? `Benchmarked to ${targetRoleObj.name}` : 'Click to run initial diagnostic'}
-          badge={readiness >= 75 ? 'Strong Fit' : readiness >= 50 ? 'Good Fit' : 'Diagnose'}
-          badgeColor={readiness >= 75 ? 'var(--success)' : readiness >= 50 ? 'var(--warning)' : 'var(--danger)'}
-          icon={Compass}
-          onClick={() => navigate('/assessment?stage=gap')}
-          ctaText="View Gap Report"
-        />
-
-        {/* 2. Identified Skill Gaps */}
-        <ConsolidatedKPICard
-          title="Identified Skill Gaps"
-          value={gapSkills.length}
-          subtitle={gapSkills.length > 0 ? `${gapSkills.slice(0, 2).join(', ')}...` : 'All role skills mastered'}
-          badge={gapSkills.length > 0 ? `${gapSkills.length} to master` : 'Clean'}
-          badgeColor={gapSkills.length > 0 ? 'var(--danger)' : 'var(--success)'}
-          icon={AlertTriangle}
-          onClick={() => navigate('/assessment?stage=gap')}
-          ctaText="Review Gaps"
-        />
-
-        {/* 3. XP & Streak Gamification (Consolidated) */}
-        <ConsolidatedKPICard
-          title="Experience & Streak"
-          value={`${xp} XP`}
-          subtitle={`${streak}-day active practice streak`}
-          badge={streak >= 3 ? `🔥 ${streak}d On Fire` : `⚡ ${streak}d Streak`}
-          badgeColor="var(--warning)"
-          icon={Trophy}
-          onClick={() => navigate('/daily-problem')}
-          ctaText="+10 XP Today"
-        />
-
-        {/* 4. Problem & Lab Mastery */}
-        <ConsolidatedKPICard
-          title="Coding Drills Solved"
-          value={solvedProblems.length}
-          subtitle="Daily challenges & interactive lab exercises"
-          badge="Interactive"
-          badgeColor="var(--brand)"
-          icon={BookOpen}
-          onClick={() => navigate('/daily-problem')}
-          ctaText="Solve Next"
-        />
-      </div>
-
-      {/* ─── Main Content Grid: YouTube Feeds & Actionable Insights ──────────── */}
-      <div className="dashboard-grid" style={{ marginBottom: 20 }}>
-        {/* Curated YouTube Learning Masterclasses & Tech News with Image Support */}
-        <CuratedLearningAndNewsFeed />
-
-        {/* Right Column: Top Critical Gaps Quick Action */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="sb-spotlight-grid">
           <div>
-            <div className="card-header" style={{ paddingBottom: 10 }}>
-              <h2 className="card-title">Top Priority Gaps</h2>
-              <span className={`badge ${gapSkills.length > 0 ? 'badge-danger' : 'badge-success'}`}>
-                {gapSkills.length > 0 ? `${gapSkills.length} Action Items` : 'All Clear'}
-              </span>
+            <h2 className="sb-spotlight-heading">
+              Close your top shortfall: <span className="sb-spotlight-target-highlight">{topGap}</span>
+            </h2>
+            <p className="sb-spotlight-desc">
+              Your target role requires verified proficiency in <strong>{topGap}</strong>. Your current evidence is <span style={{ color: 'var(--warning)', fontWeight: 600 }}>Claimed (0.25)</span>. Completing interactive lab exercises in the browser upgrades your evidence to <span style={{ color: 'var(--success)', fontWeight: 600 }}>Tested (1.00)</span> and proves production readiness.
+            </p>
+
+            <div className="sb-spotlight-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => navigate('/code-labs')}
+              >
+                Launch {topGap} Lab (15 min) →
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => navigate('/videos')}
+              >
+                <BookOpen size={14} /> Review Concept Guide
+              </button>
+            </div>
+          </div>
+
+          <div className="sb-spotlight-metric-box">
+            <div className="sb-spotlight-metric-tag">Next Skill Focus</div>
+            <div className="sb-spotlight-metric-number" style={{ color: 'var(--brand-light)', fontSize: 24, margin: '8px 0' }}>
+              {topGap}
+            </div>
+            <div className="sb-spotlight-metric-sub">
+              Estimated: ~15 mins · Production Sandbox
             </div>
 
-            {gapSkills.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {gapSkills.slice(0, 4).map((gap, i) => (
-                  <div key={gap}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{gap}</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: i < 2 ? 'var(--danger)' : 'var(--warning)' }}>
-                        {i < 2 ? 'Critical Gap' : 'Medium Gap'}
-                      </span>
-                    </div>
-                    <div className="progress-track" style={{ height: 6 }}>
+            <div className="sb-evidence-ladder">
+              <span className="sb-ladder-step">Claimed 0.25</span>
+              <span className="sb-ladder-arrow">→</span>
+              <span className="sb-ladder-step">Quizzed 0.60</span>
+              <span className="sb-ladder-arrow">→</span>
+              <span className="sb-ladder-step active">Tested 1.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 3. 4 Metric KPI Cards (Readiness Card Replaced with Roadmap Phase) ─── */}
+      <div className="sb-kpi-grid">
+        {/* Card 1: Replaced Verified Readiness with Active Roadmap Phase */}
+        <div className="sb-kpi-card" onClick={() => navigate('/improvement-map')}>
+          <div className="sb-kpi-top">
+            <span className="sb-kpi-label">Roadmap Milestone</span>
+            <div className="sb-kpi-icon-wrap">
+              <Layers size={15} />
+            </div>
+          </div>
+          <div className="sb-kpi-val" style={{ color: 'var(--brand-light)' }}>
+            Phase 2 of 4
+          </div>
+          <span className="sb-kpi-hint">
+            In Progress · 4 of 12 Weeks
+          </span>
+        </div>
+
+        {/* Card 2: Skill Shortfalls */}
+        <div className="sb-kpi-card" onClick={() => navigate('/assessment?stage=gap')}>
+          <div className="sb-kpi-top">
+            <span className="sb-kpi-label">Skill Shortfalls</span>
+            <div className="sb-kpi-icon-wrap" style={{ background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger)' }}>
+              <Compass size={15} />
+            </div>
+          </div>
+          <div className="sb-kpi-val" style={{ color: gapSkills.length > 0 ? 'var(--danger)' : 'var(--success)' }}>
+            {gapSkills.length} Skills
+          </div>
+          <span className="sb-kpi-hint">
+            {gapSkills.slice(0, 2).join(', ') || 'No critical gaps'}
+          </span>
+        </div>
+
+        {/* Card 3: Daily Streak */}
+        <div className="sb-kpi-card" onClick={() => navigate('/daily-problem')}>
+          <div className="sb-kpi-top">
+            <span className="sb-kpi-label">Daily Streak</span>
+            <div className="sb-kpi-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.12)', color: 'var(--gold)' }}>
+              <Flame size={15} />
+            </div>
+          </div>
+          <div className="sb-kpi-val" style={{ color: 'var(--gold)' }}>
+            🔥 {streak} Days
+          </div>
+          <span className="sb-kpi-hint">{xp} Total XP accumulated</span>
+        </div>
+
+        {/* Card 4: Challenges Tested */}
+        <div className="sb-kpi-card" onClick={() => navigate('/daily-problem')}>
+          <div className="sb-kpi-top">
+            <span className="sb-kpi-label">Challenges Tested</span>
+            <div className="sb-kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--success)' }}>
+              <Code2 size={15} />
+            </div>
+          </div>
+          <div className="sb-kpi-val">
+            {solvedProblems.length} Solved
+          </div>
+          <span className="sb-kpi-hint">100% verified test passes</span>
+        </div>
+      </div>
+
+      {/* ─── 4. Two-Column Workstation Layout ────────────────────────────── */}
+      <div className="sb-dash-split-layout">
+
+        {/* ─── LEFT COLUMN: Diagnostics & Curriculum ─── */}
+        <div className="sb-main-feed">
+
+          {/* Skill Diagnostic & Shortfall Matrix (CRASH FIXED) */}
+          <div className="sb-matrix-card">
+            <div className="sb-matrix-header">
+              <div>
+                <h3 className="card-title">Skill Diagnostic &amp; Shortfall Matrix</h3>
+                <p style={{ fontSize: 12, color: 'var(--text-subtle)', margin: '2px 0 0 0' }}>
+                  Target: {targetRoleObj.name} · Verified Evidence Breakdown
+                </p>
+              </div>
+
+              <div className="sb-filter-pill-group">
+                <button
+                  type="button"
+                  className={`sb-filter-pill ${matrixFilter === 'gaps' ? 'active' : ''}`}
+                  onClick={() => setMatrixFilter('gaps')}
+                >
+                  Critical Gaps ({matrixList.filter(i => i.isGap).length})
+                </button>
+                <button
+                  type="button"
+                  className={`sb-filter-pill ${matrixFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setMatrixFilter('all')}
+                >
+                  All Skills ({matrixList.length})
+                </button>
+                <button
+                  type="button"
+                  className={`sb-filter-pill ${matrixFilter === 'ready' ? 'active' : ''}`}
+                  onClick={() => setMatrixFilter('ready')}
+                >
+                  Ready ({matrixList.filter(i => !i.isGap).length})
+                </button>
+              </div>
+            </div>
+
+            <div className="sb-gap-items-list">
+              {filteredMatrix.map((item) => (
+                <div key={item.skill} className="sb-gap-row">
+                  <div className="sb-gap-row-left">
+                    <span className="sb-gap-name">{item.skill}</span>
+                    <span
+                      className="sb-gap-tag"
+                      style={{
+                        color: item.evidence === 'Tested'
+                          ? 'var(--success)'
+                          : item.evidence === 'Quizzed'
+                            ? 'var(--warning)'
+                            : 'var(--danger)'
+                      }}
+                    >
+                      {item.evidence === 'Tested'
+                        ? '✓ Tested (1.00)'
+                        : item.evidence === 'Quizzed'
+                          ? 'Quizzed (0.60)'
+                          : 'Claimed (0.25)'}
+                    </span>
+                  </div>
+
+                  <div className="sb-gap-progress-container">
+                    <div className="sb-gap-track">
                       <div
-                        className="progress-fill"
+                        className="sb-gap-fill"
                         style={{
-                          width: `${Math.max(25, 65 - i * 12)}%`,
-                          background: i < 2 ? 'var(--danger)' : 'var(--warning)',
+                          width: `${item.pct}%`,
+                          background: item.evidence === 'Tested'
+                            ? 'var(--success)'
+                            : item.evidence === 'Quizzed'
+                              ? 'var(--brand)'
+                              : 'var(--danger)'
                         }}
                       />
                     </div>
                   </div>
-                ))}
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: 11, padding: '4px 10px' }}
+                    onClick={() => navigate('/code-labs')}
+                  >
+                    {item.evidence === 'Tested' ? 'Retest' : 'Practice Lab'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Curriculum Roadmap Track */}
+          <div className="sb-curriculum-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <div>
+                <h3 className="card-title">Structured Learning Roadmap</h3>
+                <p style={{ fontSize: 12, color: 'var(--text-subtle)', margin: '2px 0 0 0' }}>
+                  Target: {targetRoleObj.name} · 4-Phase Pathway
+                </p>
               </div>
-            ) : (
-              <div style={{ padding: '24px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
-                  No critical gaps identified yet. Diagnose your skills or upload a resume in the Assessment tab.
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => navigate('/improvement-map')}
+              >
+                View Full Timeline →
+              </button>
+            </div>
+
+            <div className="sb-phases-container">
+              {phases.map(p => {
+                const isExpanded = expandedPhase === p.phase;
+                return (
+                  <div
+                    key={p.phase}
+                    className={`sb-phase-item ${p.status === 'in-progress' ? 'is-active-phase' : ''}`}
+                  >
+                    <div
+                      className="sb-phase-header"
+                      onClick={() => setExpandedPhase(isExpanded ? 0 : p.phase)}
+                    >
+                      <div className="sb-phase-title-row">
+                        <div className="sb-phase-num">{p.phase}</div>
+                        <div>
+                          <span className="sb-phase-name">{p.title}</span>
+                        </div>
+                      </div>
+
+                      <div className="sb-phase-meta">
+                        <span style={{
+                          color: p.status === 'completed'
+                            ? 'var(--success)'
+                            : p.status === 'in-progress'
+                              ? 'var(--brand-light)'
+                              : 'var(--text-subtle)',
+                          fontWeight: 700,
+                          fontSize: 10,
+                          textTransform: 'uppercase'
+                        }}>
+                          {p.status === 'completed' ? '✓ Completed' : p.status === 'in-progress' ? '● In Progress' : 'Upcoming'}
+                        </span>
+                        <span>{p.hours}</span>
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="sb-phase-content">
+                        <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
+                          Core competency drills in this milestone:
+                        </div>
+                        <div className="sb-topic-pills">
+                          {p.topics.map(t => (
+                            <span key={t} className="sb-topic-pill">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Market Demand & Peer Calibration (Accordion - Score References Removed) */}
+          <div className="card">
+            <div
+              className="sb-insights-toggle"
+              onClick={() => setInsightsOpen(v => !v)}
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <TrendingUp size={16} color="var(--brand)" />
+                <h3 style={{ fontSize: 13, fontWeight: 700, margin: 0, color: 'var(--text)' }}>
+                  Market Demand &amp; Peer Calibration
+                </h3>
+                <span className="badge badge-warning" style={{ fontSize: 10 }}>AccioJob 2026</span>
+              </div>
+              <button type="button" className="btn-chip" style={{ fontSize: 11 }}>
+                {insightsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                <span>{insightsOpen ? 'Hide' : 'Show'}</span>
+              </button>
+            </div>
+
+            {insightsOpen && (
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Demand Trend (India Hubs)</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-subtle)' }}>Sample 2026</span>
+                    </div>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <LineChart data={TREND_DATA.labels.map((l, i) => ({ label: l, demand: TREND_DATA['ai-ml'][0].data[i] }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                        <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} />
+                        <YAxis tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} unit="%" />
+                        <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11 }} />
+                        <Line type="monotone" dataKey="demand" stroke="var(--brand)" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Peer Candidates ({targetRoleObj.name})</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-subtle)' }}>Cohort Calibration</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {PEER_PROFILES.slice(0, 4).map(p => (
+                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', background: 'var(--bg-subtle)', borderRadius: 6 }}>
+                          <div style={{ width: 24, height: 24, borderRadius: 6, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>
+                            {p.name.charAt(0)}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{p.name}</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-subtle)' }}>{p.currentRole}</div>
+                          </div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand-light)' }}>
+                            Active
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+        </div>
+
+        {/* ─── RIGHT COLUMN: Practice & Routine Rail ─── */}
+        <div className="sb-side-rail">
+
+          {/* Problem of the Day Card */}
+          <div className="card sb-potd-widget">
+            <div className="sb-potd-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Zap size={15} color="var(--brand)" />
+                <h3 className="card-title" style={{ fontSize: 14 }}>Problem of the Day</h3>
+              </div>
+              <span className="badge badge-brand">+20 XP</span>
+            </div>
+
+            <div className="sb-potd-challenge-box">
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text)' }}>
+                Reverse Linked List II
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 2 }}>
+                Data Structures · Medium · Tested in Browser
+              </div>
+            </div>
+
+            {/* Countdown Clock */}
+            <div className="sb-countdown-box">
+              <div className="sb-countdown-label">NEXT PROBLEM IN</div>
+              <div className="sb-clock-display">
+                <span className="sb-digits">{countdown.hours}</span>
+                <span className="sb-sep">:</span>
+                <span className="sb-digits">{countdown.minutes}</span>
+                <span className="sb-sep">:</span>
+                <span className="sb-digits">{countdown.seconds}</span>
+              </div>
+            </div>
+
             <button
-              className="btn btn-primary btn-full btn-sm"
-              onClick={() => navigate('/assessment?stage=gap')}
+              type="button"
+              className="btn btn-primary btn-full"
+              onClick={() => navigate('/daily-problem')}
             >
-              Open Full Assessment & Chart <ArrowRight size={13} />
+              Solve Challenge in Editor →
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* ─── Progressive Disclosure: Secondary Insights Accordion ────────────── */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div
-          onClick={() => setInsightsOpen(!insightsOpen)}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            cursor: 'pointer',
-            padding: '4px 0',
-            userSelect: 'none',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <TrendingUp size={16} color="var(--brand)" />
-            <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>
-              Secondary Market Insights & Peer Benchmarks
-            </h3>
-            <span className="badge badge-info" style={{ fontSize: 10 }}>
-              {insightsOpen ? 'Click to collapse' : 'Click to expand'}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="btn-chip"
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}
-          >
-            {insightsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            <span>{insightsOpen ? 'Hide' : 'Show Details'}</span>
-          </button>
-        </div>
-
-        {insightsOpen && (
-          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-            <div className="responsive-two-col-grid" style={{ marginBottom: 16 }}>
-              {/* Emerging Demand Trend Chart */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
-                    Emerging Skill Demand (AI/ML)
-                  </span>
-                  <span style={{ fontSize: 10, color: 'var(--text-subtle)' }}>Multi-year trajectory</span>
-                </div>
-                <TrendChart />
+          {/* Today's Practice Plan (Checklist) */}
+          <div className="card sb-planner-widget">
+            <div className="card-header" style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Calendar size={15} color="var(--brand)" />
+                <h3 className="card-title" style={{ fontSize: 14 }}>Today's Practice Plan</h3>
               </div>
-
-              {/* Peer Learner Benchmarks */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
-                    Peer Learners in {targetRoleObj.name}
-                  </span>
-                  <button
-                    className="btn-link"
-                    style={{ fontSize: 11 }}
-                    onClick={() => navigate('/jobs')}
-                  >
-                    Explore Job Market →
-                  </button>
-                </div>
-                <PeerBenchmarks />
-              </div>
+              <button
+                type="button"
+                className="btn-chip"
+                onClick={() => setShowAddTask(v => !v)}
+                style={{ fontSize: 10, padding: '2px 8px' }}
+              >
+                <Plus size={11} /> Task
+              </button>
             </div>
 
-            {/* 8-Stage AI Engineering Pipeline */}
-            <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>
-                Industry 8-Stage AI Pipeline Progression
-              </div>
-              <div className="pipeline-stages">
-                {['Problem', 'Collect Data', 'Clean Data', 'Analyze', 'Build AI', 'Insight', 'Product', 'Impact'].map((stage, i) => (
-                  <div key={stage} style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className={`pipeline-stage ${i < 4 ? 'completed' : i === 4 ? 'active-stage' : ''}`}>
-                      <div className="stage-dot" />
-                      <span>{stage}</span>
-                    </div>
-                    {i < 7 && <div className={`pipeline-connector ${i < 4 ? 'completed' : ''}`} />}
+            {showAddTask && (
+              <form onSubmit={handleAddCustomTask} style={{ marginBottom: 10, display: 'flex', gap: 6 }}>
+                <input
+                  type="text"
+                  className="form-input"
+                  style={{ fontSize: 11, padding: '5px 8px' }}
+                  placeholder="e.g. Practice Docker CLI"
+                  value={newCustomTask}
+                  onChange={e => setNewCustomTask(e.target.value)}
+                  autoFocus
+                />
+                <button type="submit" className="btn btn-primary btn-sm" style={{ padding: '4px 8px', fontSize: 11 }}>
+                  Add
+                </button>
+              </form>
+            )}
+
+            <div className="sb-tasks-list">
+              {dailyTasks.map(task => (
+                <div
+                  key={task.id}
+                  className={`sb-task-item ${task.done ? 'is-complete' : ''}`}
+                  onClick={() => handleToggleTask(task)}
+                >
+                  <div className="sb-task-checkbox">
+                    {task.done && <Check size={12} />}
                   </div>
-                ))}
+                  <div className="sb-task-content">
+                    <span className="sb-task-text">{task.text}</span>
+                    <span className="sb-task-xp">+{task.xp} XP</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border-subtle)', textAlign: 'center' }}>
+              <button
+                type="button"
+                className="btn-link"
+                style={{ fontSize: 11.5 }}
+                onClick={() => navigate('/improvement-map')}
+              >
+                Open Full Roadmap Calendar →
+              </button>
+            </div>
+          </div>
+
+          {/* Fast-Track Code Labs Quick Jump */}
+          <div className="card">
+            <div className="card-header" style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Terminal size={15} color="var(--brand)" />
+                <h3 className="card-title" style={{ fontSize: 14 }}>Code Labs Quick Jump</h3>
+              </div>
+            </div>
+
+            <div className="sb-quick-labs-grid">
+              <div className="sb-quick-lab-item" onClick={() => navigate('/code-labs')}>
+                <span>🐍</span>
+                <span>Python IDE</span>
+              </div>
+              <div className="sb-quick-lab-item" onClick={() => navigate('/code-labs')}>
+                <span>🗄️</span>
+                <span>SQL Sandbox</span>
+              </div>
+              <div className="sb-quick-lab-item" onClick={() => navigate('/code-labs')}>
+                <span>🐳</span>
+                <span>Docker Lab</span>
+              </div>
+              <div className="sb-quick-lab-item" onClick={() => navigate('/code-labs')}>
+                <span>🧠</span>
+                <span>PyTorch Lab</span>
               </div>
             </div>
           </div>
-        )}
+
+        </div>
+
       </div>
 
-      <style>{`
-        .kpi-consolidated-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 14px;
-        }
-        @media (max-width: 1024px) {
-          .kpi-consolidated-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        @media (max-width: 600px) {
-          .kpi-consolidated-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        .kpi-consolidated-card:hover {
-          border-color: var(--brand);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .compact-market-pulse-bar {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          height: 36px;
-          background: var(--bg-surface);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 0 12px;
-          overflow: hidden;
-        }
-        .pulse-tag {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          font-weight: 700;
-          color: var(--brand);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          white-space: nowrap;
-          padding-right: 8px;
-          border-right: 1px solid var(--border);
-        }
-        .pulse-ping {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: #10B981;
-          box-shadow: 0 0 6px #10B981;
-        }
-        .pulse-track-window {
-          flex: 1;
-          overflow: hidden;
-          white-space: nowrap;
-          position: relative;
-        }
-        .pulse-track-slider {
-          display: inline-block;
-          white-space: nowrap;
-          animation: tickerScroll 42s linear infinite;
-        }
-        .pulse-track-slider:hover {
-          animation-play-state: paused;
-        }
-        .pulse-item {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 11.5px;
-          color: var(--text-muted);
-        }
-        .pulse-sep {
-          color: var(--text-subtle);
-          font-weight: bold;
-        }
-        .pulse-action-link {
-          background: transparent;
-          border: none;
-          color: var(--brand);
-          font-size: 11px;
-          font-weight: 700;
-          cursor: pointer;
-          white-space: nowrap;
-          padding-left: 8px;
-        }
-        .pulse-action-link:hover {
-          text-decoration: underline;
-        }
-        @keyframes tickerScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
+      {/* ─── 5. Curated Learning & Tech News Feed: At the Very Bottom ─────── */}
+      <div className="sb-dash-bottom-news">
+        <CuratedLearningAndNewsFeed />
+      </div>
+
+      {/* ─── 6. Evidence Verification Explainer Modal ─────────────────────── */}
+      {showEvidenceModal && (
+        <div className="modal-backdrop" onClick={() => setShowEvidenceModal(false)}>
+          <div className="modal-card" style={{ maxWidth: 520, padding: 24 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ShieldCheck size={20} color="var(--brand)" />
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Evidence Verification Guide</h3>
+              </div>
+              <button
+                type="button"
+                className="btn-chip"
+                onClick={() => setShowEvidenceModal(false)}
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, margin: '0 0 14px 0' }}>
+              SkillBridge tracks what you can prove with executable code in the browser rather than unverified self-ratings.
+            </p>
+
+            <div style={{ background: 'var(--bg-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border-subtle)', fontSize: 12.5, lineHeight: 1.6, color: 'var(--text)' }}>
+              <div><strong style={{ color: 'var(--brand-light)' }}>1. Three Verified Evidence Tiers:</strong></div>
+              <p style={{ margin: '4px 0 12px 0', color: 'var(--text-muted)' }}>
+                • <strong>Claimed (0.25):</strong> Detected from résumé or job keywords.<br />
+                • <strong>Quizzed (0.60):</strong> Conceptual knowledge drill completed.<br />
+                • <strong>Tested (1.00):</strong> Automated code test passed in browser IDE.
+              </p>
+
+              <div><strong style={{ color: 'var(--brand-light)' }}>2. Closing Critical Shortfalls:</strong></div>
+              <p style={{ margin: '4px 0 12px 0', color: 'var(--text-muted)' }}>
+                Completing coding challenges in Daily Problem and Code Labs upgrades your skills to Tested status, validating them for recruiters.
+              </p>
+
+              <div><strong style={{ color: 'var(--brand-light)' }}>3. Deterministic Evaluation:</strong></div>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)' }}>
+                Your progress is verified through standard unit tests and test suites, never generated or hallucinated by AI models.
+              </p>
+            </div>
+
+            <div style={{ marginTop: 18, textAlign: 'right' }}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => setShowEvidenceModal(false)}
+              >
+                Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

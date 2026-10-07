@@ -1,12 +1,277 @@
 import { useState, useMemo } from 'react';
 import {
   Calendar as CalendarIcon, List, Download, CheckSquare, Square,
-  Trophy, Zap, CheckCircle2, ChevronLeft, ChevronRight, Clock, X
+  Trophy, Zap, CheckCircle2, ChevronLeft, ChevronRight, Clock, X,
+  TrendingUp, BarChart2, Layers, Sparkles, Target, Compass
 } from 'lucide-react';
+import {
+  LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid, ReferenceLine
+} from 'recharts';
+
 import useStore from '../store/useStore.js';
 import { SKILL_ROLES, ROADMAPS, WAYPOINTS, PACING_MODES } from '../lib/data.js';
 import { generateICSContent } from '../lib/storage.js';
 import SkillResourceModules from '../components/ui/SkillResourceModules.jsx';
+
+// ─── Trajectory Simulation Generator ─────────────────────────────────────────
+function generateTrajectoryCurve(pacing = 'balanced', weeks = 12) {
+  const growthRate = { conservative: 4.8, balanced: 6.8, aggressive: 9.4 }[pacing] || 6.8;
+  const baseline = 25;
+  const points = [];
+
+  for (let w = 0; w <= weeks; w++) {
+    const projected = Math.min(100, Math.round(baseline + growthRate * w * (1 - (w / (weeks * 2.1)))));
+    const targetBenchmark = Math.min(85, Math.round(30 + (55 / weeks) * w));
+
+    let milestone = null;
+    if (w === 3) milestone = 'Python & OOP';
+    else if (w === 6) milestone = 'SQL & Pipelines';
+    else if (w === 9) milestone = 'Docker & MLOps';
+    else if (w === 12) milestone = 'Industry Ready';
+
+    points.push({
+      week: `Wk ${w}`,
+      weekNum: w,
+      projected,
+      benchmark: targetBenchmark,
+      threshold: 85,
+      milestone,
+    });
+  }
+  return points;
+}
+
+// ─── Domain Competency Breakdown Data ───────────────────────────────────────
+const DOMAIN_COMPETENCIES = [
+  { domain: 'Python & Algorithms', current: 75, target: 90 },
+  { domain: 'SQL & Data Modeling', current: 70, target: 85 },
+  { domain: 'Docker & Containers', current: 35, target: 80 },
+  { domain: 'MLOps & CI/CD', current: 25, target: 80 },
+  { domain: 'Cloud & Telemetry', current: 20, target: 75 },
+  { domain: 'System Design', current: 40, target: 75 },
+];
+
+// ─── Visual Skill Trajectory & Mastery Graph Component ──────────────────────
+function SkillTrajectoryGraph({ pacing, setPacing, roleName }) {
+  const [graphMode, setGraphMode] = useState('curve'); // 'curve' | 'domains'
+  const weeks = PACING_MODES[pacing]?.totalWeeks || 12;
+  const trajectoryData = useMemo(() => generateTrajectoryCurve(pacing, weeks), [pacing, weeks]);
+
+  return (
+    <div className="card" style={{ marginBottom: 20 }}>
+      {/* Graph Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14, marginBottom: 16 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span className="badge badge-brand" style={{ fontSize: 10 }}>PROJECTED GROWTH</span>
+            <span style={{ fontSize: 12, color: 'var(--text-subtle)' }}>Target Role: {roleName}</span>
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: 'var(--text)', margin: 0 }}>
+            Career Milestone Trajectory Graph
+          </h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '3px 0 0 0' }}>
+            Simulate week-by-week skill progression toward industry entry-level benchmark standards.
+          </p>
+        </div>
+
+        {/* View mode toggle & Pacing presets */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-subtle)', padding: 3, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
+            <button
+              type="button"
+              className={`btn-chip ${graphMode === 'curve' ? 'active' : ''}`}
+              onClick={() => setGraphMode('curve')}
+              style={{
+                fontSize: 11,
+                border: 'none',
+                background: graphMode === 'curve' ? 'rgba(232, 130, 58, 0.2)' : 'transparent',
+                color: graphMode === 'curve' ? 'var(--brand-light)' : 'var(--text-muted)'
+              }}
+            >
+              <TrendingUp size={12} style={{ marginRight: 4 }} /> 12-Week Curve
+            </button>
+            <button
+              type="button"
+              className={`btn-chip ${graphMode === 'domains' ? 'active' : ''}`}
+              onClick={() => setGraphMode('domains')}
+              style={{
+                fontSize: 11,
+                border: 'none',
+                background: graphMode === 'domains' ? 'rgba(232, 130, 58, 0.2)' : 'transparent',
+                color: graphMode === 'domains' ? 'var(--brand-light)' : 'var(--text-muted)'
+              }}
+            >
+              <BarChart2 size={12} style={{ marginRight: 4 }} /> Domain Mastery
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: 6 }}>
+            {Object.entries(PACING_MODES).map(([pk, p]) => (
+              <button
+                key={pk}
+                type="button"
+                className={`btn-chip ${pacing === pk ? 'active' : ''}`}
+                onClick={() => setPacing(pk)}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 8px',
+                  background: pacing === pk ? 'rgba(232, 130, 58, 0.2)' : undefined,
+                  borderColor: pacing === pk ? 'var(--brand)' : undefined,
+                  color: pacing === pk ? 'var(--brand-light)' : undefined,
+                }}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Chart Canvas */}
+      {graphMode === 'curve' ? (
+        <div>
+          <div style={{ width: '100%', height: 260 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trajectoryData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.38} />
+                    <stop offset="95%" stopColor="var(--brand)" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+                <XAxis
+                  dataKey="week"
+                  tick={{ fontSize: 11, fill: 'var(--text-subtle)' }}
+                  axisLine={{ stroke: 'var(--border-subtle)' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fontSize: 11, fill: 'var(--text-subtle)' }}
+                  axisLine={{ stroke: 'var(--border-subtle)' }}
+                  tickLine={false}
+                  unit="%"
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div style={{
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border)',
+                          borderRadius: 8,
+                          padding: '10px 12px',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                          fontSize: 12
+                        }}>
+                          <div style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>
+                            {data.week} ({PACING_MODES[pacing]?.hoursPerDay}h/day study)
+                          </div>
+                          <div style={{ color: 'var(--brand-light)', fontWeight: 600 }}>
+                            Projected Mastery: {data.projected}%
+                          </div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>
+                            Benchmark Target: {data.benchmark}%
+                          </div>
+                          {data.milestone && (
+                            <div style={{ color: 'var(--success)', fontWeight: 700, marginTop: 4, fontSize: 11 }}>
+                              🎯 Milestone: {data.milestone}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <ReferenceLine
+                  y={85}
+                  stroke="#10B981"
+                  strokeDasharray="4 4"
+                  label={{ value: 'Entry-Level Threshold (85%)', fill: '#10B981', fontSize: 10, position: 'insideTopRight' }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="projected"
+                  stroke="var(--brand)"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#curveGradient)"
+                  dot={{ r: 3, fill: 'var(--brand)', strokeWidth: 1, stroke: '#fff' }}
+                  activeDot={{ r: 6, fill: 'var(--brand-light)' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="benchmark"
+                  stroke="rgba(255, 255, 255, 0.3)"
+                  strokeWidth={1.5}
+                  strokeDasharray="3 3"
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Milestone Waypoint Pills Below Chart */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-subtle)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)' }} />
+              <span>Projected Mastery</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-subtle)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
+              <span>Target Benchmark: 85%</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-subtle)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255, 255, 255, 0.4)' }} />
+              <span>Estimated Trajectory Pace</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Domain Mastery Comparison Bar Breakdown */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
+          {DOMAIN_COMPETENCIES.map((d) => (
+            <div key={d.domain} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{d.domain}</span>
+                <span style={{ color: 'var(--text-subtle)' }}>
+                  Current: <strong style={{ color: d.current >= d.target ? 'var(--success)' : 'var(--brand-light)' }}>{d.current}%</strong> / Target: {d.target}%
+                </span>
+              </div>
+              <div style={{ height: 8, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${d.current}%`,
+                    background: d.current >= d.target ? 'var(--success)' : 'var(--brand)',
+                    borderRadius: 4,
+                    transition: 'width 0.5s ease',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: `${d.target}%`,
+                    width: 2,
+                    height: '100%',
+                    background: '#fff',
+                    opacity: 0.6,
+                  }}
+                  title={`Target: ${d.target}%`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Waypoint Flowchart ───────────────────────────────────────────────────────
 function WaypointFlowchart() {
@@ -33,10 +298,10 @@ function WaypointFlowchart() {
     <div className="card" style={{ marginBottom: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', color: '#A78BFA', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--brand-light)', textTransform: 'uppercase' }}>
             Visual Milestone Progression
           </div>
-          <h2 style={{ fontFamily: 'Outfit', fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>
             Career Waypoint Flowchart
           </h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
@@ -88,7 +353,7 @@ function WaypointFlowchart() {
         if (!wp) return null;
         const completed = completedWaypoints.includes(wp.id);
         return (
-          <div style={{ marginTop: 16, background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)', borderRadius: 8, padding: 16 }}>
+          <div style={{ marginTop: 16, background: 'rgba(232,130,58,0.08)', border: '1px solid rgba(232,130,58,0.25)', borderRadius: 8, padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <div>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{wp.title}</h3>
@@ -124,7 +389,6 @@ function GamificationBar() {
   const xp = useStore(s => s.xp);
   const streak = useStore(s => s.streak);
   const committedPath = useStore(s => s.committedPath);
-  const setPacing = useStore(s => s.setPacing);
 
   const completedCount = committedPath?.completedTaskIds?.length || 0;
   const totalTasks = committedPath?.tasks?.length || 18;
@@ -151,7 +415,7 @@ function GamificationBar() {
           <div className="cal-v2-stat-val">{streak} Days</div>
           <div className="cal-v2-stat-label">Active Learning Streak</div>
         </div>
-        {streak >= 3 && <span className="badge badge-warning" style={{ marginLeft: 'auto', fontSize: 10 }}>🔥 Fire</span>}
+        {streak >= 3 && <span className="badge badge-warning" style={{ marginLeft: 'auto', fontSize: 10 }}>🔥 Active</span>}
       </div>
 
       <div className="cal-v2-stat-card">
@@ -165,7 +429,7 @@ function GamificationBar() {
       </div>
 
       <div className="cal-v2-stat-card">
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(232,130,58,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Clock size={20} color="var(--brand-light)" />
         </div>
         <div style={{ flex: 1 }}>
@@ -177,7 +441,7 @@ function GamificationBar() {
   );
 }
 
-// ─── Completely Redesigned Dynamic Calendar UI ────────────────────────────────
+// ─── Dynamic Calendar Grid UI ────────────────────────────────────────────────
 function RedesignedCalendarView({ committedPath, onSelectTask }) {
   const toggleTaskComplete = useStore(s => s.toggleTaskComplete);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -185,17 +449,12 @@ function RedesignedCalendarView({ committedPath, onSelectTask }) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // First day of month and total days
-  const firstDay = new Date(year, month, 1).getDay(); // 0 = Sun, 1 = Mon...
+  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-  // Offset so Monday is day 0
   const startOffset = (firstDay + 6) % 7;
-
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Group tasks by date string (YYYY-MM-DD)
   const tasksByDate = useMemo(() => {
     const map = {};
     (committedPath?.tasks || []).forEach(task => {
@@ -206,21 +465,17 @@ function RedesignedCalendarView({ committedPath, onSelectTask }) {
   }, [committedPath]);
 
   const completedIds = committedPath?.completedTaskIds || [];
-
-  // Generate 35 or 42 grid cells
   const cells = [];
-  // Previous month trailing days
+
   for (let i = startOffset - 1; i >= 0; i--) {
     const dayNum = daysInPrevMonth - i;
     const d = new Date(year, month - 1, dayNum);
     cells.push({ date: d, dayNum, isCurrentMonth: false, dateStr: d.toISOString().split('T')[0] });
   }
-  // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     const dateObj = new Date(year, month, d);
     cells.push({ date: dateObj, dayNum: d, isCurrentMonth: true, dateStr: dateObj.toISOString().split('T')[0] });
   }
-  // Next month leading days
   const remaining = (7 - (cells.length % 7)) % 7;
   for (let d = 1; d <= remaining; d++) {
     const dateObj = new Date(year, month + 1, d);
@@ -238,7 +493,6 @@ function RedesignedCalendarView({ committedPath, onSelectTask }) {
 
   return (
     <div className="cal-v2-grid-wrapper">
-      {/* Calendar Header */}
       <div className="cal-v2-header" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <h3 className="cal-v2-title">
@@ -252,7 +506,7 @@ function RedesignedCalendarView({ committedPath, onSelectTask }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 11, color: 'var(--text-subtle)', marginRight: 12 }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82F6' }} /> Scheduled
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)' }} /> Scheduled
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} /> Completed
@@ -267,14 +521,12 @@ function RedesignedCalendarView({ committedPath, onSelectTask }) {
         </div>
       </div>
 
-      {/* Weekday Names Header */}
       <div className="cal-v2-day-names">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
           <div key={day} className="cal-v2-day-name">{day}</div>
         ))}
       </div>
 
-      {/* Days Grid */}
       <div className="cal-v2-days-grid">
         {cells.map((cell, idx) => {
           const isToday = cell.dateStr === todayStr;
@@ -294,7 +546,6 @@ function RedesignedCalendarView({ committedPath, onSelectTask }) {
                 )}
               </div>
 
-              {/* Task Pills */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 2 }}>
                 {dayTasks.map(task => {
                   const isDone = completedIds.includes(task.id);
@@ -365,7 +616,7 @@ function TaskDetailModal({ task, onClose, onToggleComplete, isCompleted }) {
           overflowY: 'auto',
           background: 'var(--bg-card)',
           boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-          border: '1px solid #475569',
+          border: '1px solid var(--border)',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -378,7 +629,7 @@ function TaskDetailModal({ task, onClose, onToggleComplete, isCompleted }) {
               <span className="badge badge-brand">{task.skill}</span>
               <span className="badge badge-info">{task.weekLabel}</span>
             </div>
-            <h2 style={{ fontFamily: 'Outfit', fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>
               {task.title}
             </h2>
             <div style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 2 }}>
@@ -390,7 +641,7 @@ function TaskDetailModal({ task, onClose, onToggleComplete, isCompleted }) {
           </button>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 16 }}>
+        <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-subtle)', marginBottom: 4 }}>
             Task Objective
           </div>
@@ -399,7 +650,6 @@ function TaskDetailModal({ task, onClose, onToggleComplete, isCompleted }) {
           </p>
         </div>
 
-        {/* Actionable Practice & Learning Resources */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>
             Curated Resources for this Task:
@@ -407,9 +657,8 @@ function TaskDetailModal({ task, onClose, onToggleComplete, isCompleted }) {
           <SkillResourceModules skillName={task.skill} compact={false} />
         </div>
 
-        {/* Footer Actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div>
             <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--warning)' }}>Reward: +{task.xp} XP</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -444,9 +693,9 @@ function RoadmapViewWithResources({ role, level, completedWeeks, toggleWeek }) {
     const priorities = ['critical', 'critical', 'high', 'high', 'medium', 'low'];
     return genericSkills.map((sk, i) => ({
       weeks: weeks[i],
-      skill: sk.name,
-      desc: `Master ${sk.name} concepts, practical drills, and production workflows for the ${roleData.name} role.`,
-      tags: [sk.name, 'Practice', 'Projects'],
+      skill: typeof sk === 'string' ? sk : sk.name,
+      desc: `Master ${typeof sk === 'string' ? sk : sk.name} concepts, practical drills, and production workflows for the ${roleData.name} role.`,
+      tags: [typeof sk === 'string' ? sk : sk.name, 'Practice', 'Projects'],
       priority: priorities[i],
       hours: 16 + i * 2,
     }));
@@ -486,7 +735,6 @@ function RoadmapViewWithResources({ role, level, completedWeeks, toggleWeek }) {
               </div>
             </div>
 
-            {/* Embedded Actionable Practice & Learning Modules */}
             <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
               <SkillResourceModules skillName={week.skill} compact={false} />
             </div>
@@ -508,8 +756,12 @@ export default function ImprovementMapPage() {
   const addXP = useStore(s => s.addXP);
 
   const role = committedPath?.role || 'ml-engineer';
+  const roleName = SKILL_ROLES[role]?.name || 'Machine Learning Engineer';
+  const currentPacing = committedPath?.pacing || 'balanced';
   const level = 'intermediate';
-  const [view, setView] = useState('calendar'); // 'calendar' | 'roadmap'
+
+  // Active View Switcher: 'graph' | 'calendar' | 'roadmap'
+  const [view, setView] = useState('graph');
   const [selectedTask, setSelectedTask] = useState(null);
 
   const handleToggleWeek = (key) => {
@@ -523,7 +775,7 @@ export default function ImprovementMapPage() {
 
   const exportICS = () => {
     const tasks = committedPath?.tasks || [];
-    const content = generateICSContent(tasks, `${SKILL_ROLES[role]?.name || 'SkillBridge'} Study Calendar`);
+    const content = generateICSContent(tasks, `${roleName} Study Calendar`);
     const blob = new Blob([content], { type: 'text/calendar' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -539,9 +791,9 @@ export default function ImprovementMapPage() {
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Improvement Map & Calendar</h1>
+          <h1 className="page-title">Improvement Map &amp; Trajectory</h1>
           <p className="page-subtitle">
-            Gamified learning milestones, scheduled calendar drills, and actionable LeetCode/Coursera resources
+            Visual milestone trajectory graphs, scheduled practice calendars, and curated learning roadmaps
           </p>
         </div>
         <div className="header-actions">
@@ -551,16 +803,23 @@ export default function ImprovementMapPage() {
         </div>
       </div>
 
-      {/* Gamification Status Bar (Running Points, Daily Streak, Completed Ratio) */}
+      {/* Gamification Status Bar */}
       <GamificationBar />
 
       {/* Visual Waypoint Flowchart */}
       <WaypointFlowchart />
 
-      {/* View Switcher & Filter Controls */}
+      {/* ─── Trajectory Graph Component (Always Accessible) ─── */}
+      <SkillTrajectoryGraph
+        pacing={currentPacing}
+        setPacing={setPacing}
+        roleName={roleName}
+      />
+
+      {/* View Switcher Controls */}
       <div className="card" style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-          {/* View Mode Toggle */}
+          {/* View Mode Toggle with Graph, Calendar & Roadmap */}
           <div className="cal-v2-view-switcher">
             <button
               className={`cal-v2-view-btn ${view === 'calendar' ? 'active' : ''}`}
@@ -574,7 +833,7 @@ export default function ImprovementMapPage() {
               onClick={() => setView('roadmap')}
             >
               <List size={13} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-              Milestone Roadmap & Resource Drills
+              Milestone Roadmap &amp; Resource Drills
             </button>
           </div>
 
@@ -584,11 +843,11 @@ export default function ImprovementMapPage() {
             {Object.entries(PACING_MODES).map(([key, mode]) => (
               <button
                 key={key}
-                className={`btn-chip ${committedPath?.pacing === key ? 'active' : ''}`}
+                className={`btn-chip ${currentPacing === key ? 'active' : ''}`}
                 style={{
-                  background: committedPath?.pacing === key ? 'rgba(37,99,235,0.2)' : undefined,
-                  borderColor: committedPath?.pacing === key ? 'var(--brand)' : undefined,
-                  color: committedPath?.pacing === key ? 'var(--brand-light)' : undefined,
+                  background: currentPacing === key ? 'rgba(232, 130, 58, 0.2)' : undefined,
+                  borderColor: currentPacing === key ? 'var(--brand)' : undefined,
+                  color: currentPacing === key ? 'var(--brand-light)' : undefined,
                 }}
                 onClick={() => setPacing(key)}
               >

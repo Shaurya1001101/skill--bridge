@@ -21,6 +21,8 @@ export default function SkillAnalyzerPage() {
   const [editableSkills, setEditableSkills] = useState([]);
   const [newSkillInput, setNewSkillInput] = useState('');
   const [matchResults, setMatchResults] = useState(null);
+  const [avatarImgErrors, setAvatarImgErrors] = useState({});
+  const [selectedCandidateId, setSelectedCandidateId] = useState('user');
   const fileInputRef = useRef(null);
 
   // Helper to re-calculate role match based on current editable skills
@@ -68,6 +70,7 @@ export default function SkillAnalyzerPage() {
     setDocSuccess('');
     const c = SAMPLE_CANDIDATES[key];
     if (!c) return;
+    setSelectedCandidateId(key);
     setInputText(c.text);
     setTargetRole(c.targetRole);
     addToast(`${c.name}'s profile loaded`, 'success');
@@ -268,25 +271,122 @@ export default function SkillAnalyzerPage() {
         </div>
       )}
 
-      {/* Sample Candidate Profiles */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div className="card-header">
-          <h2 className="card-title">Test with Sample Candidate Profiles</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Click any profile to pre-fill test resumes and role benchmarks</p>
-        </div>
-        <div className="sample-profiles-grid">
-          {Object.values(SAMPLE_CANDIDATES).map(c => (
-            <div key={c.id} className="sample-profile-card" onClick={() => loadCandidate(c.id)}>
-              <div className="sample-avatar" style={{ background: c.color }}>{c.avatar}</div>
-              <div className="sample-name">{c.name}</div>
-              <div className="sample-role">{c.currentRole}</div>
-              <div className="sample-skills">
-                {c.skills.slice(0, 4).map(s => (
-                  <span key={s} className="sample-skill-chip">{s}</span>
-                ))}
-              </div>
+      {/* LinkedIn-Style Demo Profiles Board */}
+      <div className="linkedin-profiles-board">
+        <div className="linkedin-board-header">
+          <div className="linkedin-header-left">
+            <div className="linkedin-in-logo">in</div>
+            <div>
+              <h3 className="linkedin-board-title">
+                <span>LinkedIn Candidate Profiles</span>
+                <span className="linkedin-verified-badge" title="Verified Demo Resumes">✓ Verified</span>
+              </h3>
+              <p className="linkedin-board-subtitle">
+                Click any pre-populated LinkedIn demo profile to pre-fill resumes and test role benchmarks
+              </p>
             </div>
-          ))}
+          </div>
+          <div className="linkedin-header-right">
+            <span className="linkedin-badge-pill">
+              <span className="linkedin-pulse-dot" /> 5 Live Profiles
+            </span>
+          </div>
+        </div>
+
+        <div className="linkedin-profiles-grid">
+          {Object.values(SAMPLE_CANDIDATES).map(c => {
+            const isSelected = selectedCandidateId === c.id;
+            const hasImgError = avatarImgErrors[c.id];
+            return (
+              <div
+                key={c.id}
+                className={`linkedin-profile-card ${isSelected ? 'selected-profile' : ''}`}
+                onClick={() => loadCandidate(c.id)}
+                title={`Click to analyze ${c.name}'s LinkedIn profile`}
+              >
+                {/* Cover Banner */}
+                <div
+                  className="linkedin-card-cover"
+                  style={{ background: c.bannerGradient || 'linear-gradient(135deg, #1e3a8a, #3b82f6)' }}
+                >
+                  <span className="linkedin-cover-badge">{c.exp}</span>
+                  <div className="linkedin-card-in-icon">in</div>
+                </div>
+
+                {/* Avatar & Degree Row */}
+                <div className="linkedin-avatar-container">
+                  <div className="linkedin-avatar-wrap">
+                    {!hasImgError && c.avatarImg ? (
+                      <img
+                        src={c.avatarImg}
+                        alt={c.name}
+                        className={`linkedin-avatar-img ${c.openToWork ? 'linkedin-opentowork-ring' : ''}`}
+                        onError={() => setAvatarImgErrors(prev => ({ ...prev, [c.id]: true }))}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div
+                        className={`linkedin-avatar-fallback ${c.openToWork ? 'linkedin-opentowork-ring' : ''}`}
+                        style={{ background: c.color }}
+                      >
+                        {c.avatar}
+                      </div>
+                    )}
+                    <span className="linkedin-online-dot" title="Active on LinkedIn" />
+                  </div>
+                  <span className="linkedin-degree-pill">· {c.connectionDegree || '1st'}</span>
+                </div>
+
+                {/* Profile Information */}
+                <div className="linkedin-card-body">
+                  <div className="linkedin-candidate-name">
+                    <span>{c.name}</span>
+                    <svg className="linkedin-verified-check" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+
+                  <div className="linkedin-candidate-headline" title={c.headline}>
+                    {c.headline || `${c.currentRole} @ ${c.company}`}
+                  </div>
+
+                  <div className="linkedin-candidate-loc">
+                    <span>📍 {c.location || 'India · Remote'}</span>
+                  </div>
+
+                  {c.openToWork && (
+                    <div className="linkedin-opentowork-badge">
+                      <span className="linkedin-green-dot" /> #OPEN TO WORK
+                    </div>
+                  )}
+
+                  {/* Top Endorsed Skills */}
+                  <div className="linkedin-skills-section">
+                    <div className="linkedin-skills-label">Top Endorsed Skills</div>
+                    <div className="linkedin-skill-chips">
+                      {(c.endorsedSkills || c.skills.slice(0, 4).map(s => ({ name: s, count: '50+' }))).slice(0, 3).map(sk => (
+                        <span key={sk.name} className="linkedin-skill-chip">
+                          {sk.name} <strong>({sk.count})</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    type="button"
+                    className={`linkedin-action-btn ${isSelected ? 'active-btn' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      loadCandidate(c.id);
+                    }}
+                  >
+                    {isSelected ? '✓ Profile Selected' : '+ Benchmark Profile'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

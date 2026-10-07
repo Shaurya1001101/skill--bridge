@@ -127,13 +127,13 @@ export default function CuratedLearningAndNewsFeed() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span className="badge badge-brand">Curated Media</span>
-            <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Updated Daily &bull; High-Yield Tech Knowledge</span>
+            <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Curated picks &bull; not a live feed</span>
           </div>
           <h2 className="card-title" style={{ fontSize: 18 }}>
             Featured Tech News & YouTube Learning Masterclasses
           </h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-            Hand-picked industry breakthroughs and top-rated YouTube video tutorials to accelerate your technical growth.
+            Useful videos and articles curated by the team — not a live or automated feed.
           </p>
         </div>
 
