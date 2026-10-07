@@ -153,7 +153,7 @@ export default function LoginPage() {
         return;
       }
     } catch (fetchErr) {
-      setError(`Cannot connect to backend server (${fetchErr.message}). Please verify backend is running on port 5000 so credentials can be validated against Supabase.`);
+      setError(`Cannot connect to Supabase authentication (${fetchErr.message}). Please check your Supabase connection and credentials.`);
     }
     setLoading(false);
   };
@@ -202,7 +202,7 @@ export default function LoginPage() {
         return;
       }
     } catch (fetchErr) {
-      setError(`Cannot connect to backend server (${fetchErr.message}). Please verify backend is running on port 5000 so your account can be created in Supabase.`);
+      setError(`Cannot connect to Supabase registration (${fetchErr.message}). Please check your Supabase connection and credentials.`);
     }
     setLoading(false);
   };
@@ -369,15 +369,15 @@ export default function LoginPage() {
               <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
                 <span style={{ fontWeight: 600, color: dbHealth.online ? '#10b981' : '#ef4444' }}>
                   {dbHealth.checking
-                    ? 'Pinging Supabase backend...'
+                    ? 'Pinging Supabase Cloud...'
                     : dbHealth.online
                     ? 'Supabase PostgreSQL Connected'
-                    : 'Backend Server Unreachable'}
+                    : 'Supabase Offline / Standby'}
                 </span>
                 <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                   {dbHealth.online
-                    ? `Live on port 5000 · Latency ${dbHealth.latencyMs ? `${dbHealth.latencyMs}ms` : '<10ms'}`
-                    : 'Run "npm run dev" · Listening on port 5000'}
+                    ? `Connected to Supabase · Latency ${dbHealth.latencyMs ? `${dbHealth.latencyMs}ms` : '<10ms'}`
+                    : 'Connecting to Supabase Cloud...'}
                 </span>
               </div>
             </div>

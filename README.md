@@ -74,11 +74,12 @@ That's it! Your terminal will show a link like `http://localhost:5173`. Open tha
 
 ---
 
-## 🔗 Connecting to the Backend
-
-The frontend is built to be smart:
-- **With the Backend Running:** If you start the backend server (`http://localhost:5000`), the frontend automatically routes all login, signup, profile updates, and milestone syncs directly to the Express server and **Supabase PostgreSQL**.
-- **Offline / Standalone:** If the backend isn't running, you can still test everything! Click **"1-Click Demo Login"** on the login page to immediately explore the app with pre-loaded demo data.
+## 🔗 Connecting to Supabase & Vercel
+ 
+The frontend is built for full cloud resilience:
+- **Direct Supabase Cloud Integration:** Connects directly to **Supabase PostgreSQL & Auth** (`https://xabzaaychzdpgtbgcrcx.supabase.co`), requiring no local port 5000 server.
+- **Vercel Production Deployment:** Runs seamlessly on Vercel with built-in serverless functions under `/api` and direct browser-to-Supabase client support.
+- **Demo & Offline Resilient:** Click **"1-Click Demo Login"** on the login page to immediately explore the app with pre-loaded demo engineer data (Alex Mercer).
 
 ---
 
