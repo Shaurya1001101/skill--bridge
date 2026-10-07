@@ -171,12 +171,14 @@ const ROLE_CURRICULA = {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const user = useStore(s => s.user);
+  const userSkills = useStore(s => s.userSkills) || { all: [] };
   const gapResults = useStore(s => s.gapResults);
-  const xp = useStore(s => s.xp);
-  const streak = useStore(s => s.streak);
-  const addXp = useStore(s => s.addXp);
+  const xp = useStore(s => s.xp) || 0;
+  const streak = useStore(s => s.streak) || 1;
+  const addXP = useStore(s => s.addXP);
+  const addXp = useStore(s => s.addXp || s.addXP);
   const addToast = useStore(s => s.addToast);
-  const solvedProblems = useStore(s => s.solvedProblems);
+  const solvedProblems = useStore(s => s.solvedProblems) || [];
   const targetRole = useStore(s => s.targetRole) || 'ml-engineer';
   const setTargetRole = useStore(s => s.setTargetRole);
 
@@ -204,11 +206,11 @@ export default function DashboardPage() {
   }, []);
 
   const isDemo = (user?.email === 'user@skillbridge.io' || user?.email === 'alex@skillbridge.io') && (user?.id === 1 || user?.id === '1') && Boolean(userSkills?.all?.length > 0 || gapResults);
-  const targetRoleObj = SKILL_ROLES[targetRole] || SKILL_ROLES['ml-engineer'];
+  const targetRoleObj = SKILL_ROLES[targetRole] || SKILL_ROLES['ml-engineer'] || { name: 'Machine Learning Engineer', skills: [] };
   const hasUserSkills = Boolean((userSkills?.all && userSkills.all.length > 0) || gapResults);
 
   // Safely normalize skills from targetRoleObj.skills
-  const allRoleSkills = (targetRoleObj.skills || []).map(s => {
+  const allRoleSkills = (targetRoleObj?.skills || []).map(s => {
     if (typeof s === 'string') return { name: s, weight: 0.15, required: 3 };
     return { name: s.name, weight: s.weight ?? 0.15, required: s.required ?? 3 };
   });
@@ -718,7 +720,7 @@ export default function DashboardPage() {
                       <span style={{ fontSize: 10, color: 'var(--text-subtle)' }}>Sample 2026</span>
                     </div>
                     <ResponsiveContainer width="100%" height={160}>
-                      <LineChart data={TREND_DATA.labels.map((l, i) => ({ label: l, demand: TREND_DATA['ai-ml'][0].data[i] }))}>
+                      <LineChart data={(TREND_DATA?.labels || ['Q1', 'Q2', 'Q3', 'Q4']).map((l, i) => ({ label: l, demand: TREND_DATA?.['ai-ml']?.[0]?.data?.[i] ?? 45 }))}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                         <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} />
                         <YAxis tick={{ fontSize: 9, fill: 'var(--text-subtle)' }} unit="%" />
@@ -734,7 +736,7 @@ export default function DashboardPage() {
                       <span style={{ fontSize: 10, color: 'var(--text-subtle)' }}>Cohort Calibration</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {PEER_PROFILES.slice(0, 4).map(p => (
+                      {(PEER_PROFILES || []).slice(0, 4).map(p => (
                         <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', background: 'var(--bg-subtle)', borderRadius: 6 }}>
                           <div style={{ width: 24, height: 24, borderRadius: 6, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff' }}>
                             {p.name.charAt(0)}

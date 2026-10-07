@@ -11,11 +11,19 @@ const storage = {
   set(key, value) {
     try { localStorage.setItem(PREFIX + key, JSON.stringify(value)); } catch {}
   },
-  remove(key) { localStorage.removeItem(PREFIX + key); },
+  remove(key) {
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem(PREFIX + key);
+    } catch {}
+  },
   clear() {
-    Object.keys(localStorage)
-      .filter(k => k.startsWith(PREFIX))
-      .forEach(k => localStorage.removeItem(k));
+    try {
+      if (typeof localStorage !== 'undefined') {
+        Object.keys(localStorage)
+          .filter(k => k.startsWith(PREFIX))
+          .forEach(k => localStorage.removeItem(k));
+      }
+    } catch {}
   },
 };
 

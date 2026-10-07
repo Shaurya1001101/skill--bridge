@@ -26,7 +26,7 @@ import { chatAgent } from './aiEngine.js';
  * or allows direct client-side Supabase integration.
  */
 function resolveInitialApiBase() {
-  if (import.meta.env.VITE_API_URL && typeof import.meta.env.VITE_API_URL === 'string') {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL && typeof import.meta.env.VITE_API_URL === 'string') {
     return import.meta.env.VITE_API_URL.trim().replace(/\/$/, '');
   }
   return '';

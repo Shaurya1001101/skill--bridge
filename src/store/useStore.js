@@ -305,6 +305,7 @@ const useStore = create((set, get) => ({
     set({ xp: newXP, streak: newStreak, lastSolvedDate: today });
     get().syncToBackend();
   },
+  addXp: (pts) => get().addXP(pts),
   markProblemSolved: (id) => {
     const curr = get().solvedProblems;
     if (!curr.includes(id)) {

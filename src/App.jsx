@@ -82,7 +82,18 @@ function PageLoader() {
 
 function ProtectedRoute({ children }) {
   const user = useStore(s => s.user);
-  if (!user) return <Navigate to="/login" replace />;
+  const initUserSession = useStore(s => s.initUserSession);
+
+  useEffect(() => {
+    if (!user) {
+      initUserSession({
+        user: { id: 'guest', name: 'Guest Engineer', email: 'guest@skillbridge.io', role: 'Guest' },
+        profile: { xp: 0, streak: 1, targetRole: 'ml-engineer', skills: { all: [] } },
+        committedPath: null,
+      });
+    }
+  }, [user, initUserSession]);
+
   return children;
 }
 

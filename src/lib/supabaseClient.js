@@ -7,10 +7,10 @@ import { createClient } from '@supabase/supabase-js';
 
 // Supabase project credentials
 export const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || 'https://xabzaaychzdpgtbgcrcx.supabase.co';
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) || 'https://xabzaaychzdpgtbgcrcx.supabase.co';
 
 export const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) || '';
 
 // Fallback anon token format to allow graceful initialization before key insertion
 const fallbackKey =
