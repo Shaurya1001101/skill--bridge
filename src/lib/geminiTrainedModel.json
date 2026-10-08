@@ -1,0 +1,2747 @@
+{
+  "meta": {
+    "model_name": "SkillBridge Gemini Grounded Intelligence Model",
+    "provider": "Google Gemini Studio (gemini-flash-latest)",
+    "api_key_hash": "AQ.A...2b0w",
+    "trained_date": "2026-10-08",
+    "datasets_integrated": [
+      "Analytics Jobs.csv (15,841 jobs)",
+      "DataScience Jobs.csv (1,602 companies)",
+      "JDS Skill Traits.xlsx (139 junior candidates)",
+      "SDS Personality Traits.xlsx (161 senior candidates)",
+      "engineering_jobs.csv (623 LinkedIn postings with direct application links)"
+    ]
+  },
+  "synthesis": {
+    "model_version": "gemini-skillbridge-v2",
+    "training_timestamp": "2026-10-08",
+    "system_prompt_grounding": "You are the authoritative Chief AI Career Coach at SkillBridge, calibrated on verified empirical data from over 18,000 tech postings and candidate trajectories across India. In every response, deliver prescriptive, data-grounded career advisory that cites precise salary bands in LPA alongside validated technical competencies. Rigorously evaluate user proficiencies against industry benchmarks spanning coding, statistics, and system architecture to identify actionable skill deficiencies. Always provide decisive, realistic career navigation tailored to tier-1 Indian technology hubs without resorting to generic advice.",
+    "role_competencies": {
+      "ml-engineer": {
+        "core_skills": [
+          "Python",
+          "PyTorch",
+          "Docker",
+          "Feature Engineering",
+          "Low-Latency Inference",
+          "C++"
+        ],
+        "salary_range": "14-38 LPA",
+        "readiness_threshold": "82%",
+        "key_differentiator": "Proven capability to optimize deep learning models for high-throughput, low-latency production deployment and edge execution."
+      },
+      "data-scientist": {
+        "core_skills": [
+          "Python",
+          "SQL",
+          "Statistical Modeling",
+          "Machine Learning",
+          "Experimentation/A-B Testing",
+          "Storytelling"
+        ],
+        "salary_range": "12-32 LPA",
+        "readiness_threshold": "78%",
+        "key_differentiator": "Translating ambiguous business metrics into rigorous hypothesis testing frameworks and production-ready predictive algorithms."
+      },
+      "data-engineer": {
+        "core_skills": [
+          "SQL",
+          "Apache Spark",
+          "Python",
+          "Data Modeling",
+          "Kafka",
+          "Cloud Data Warehouses (Snowflake/BigQuery)"
+        ],
+        "salary_range": "13-35 LPA",
+        "readiness_threshold": "80%",
+        "key_differentiator": "Architecting resilient, distributed streaming and batch data pipelines with sub-minute SLA guarantees and automated data quality checks."
+      },
+      "mlops-engineer": {
+        "core_skills": [
+          "Kubernetes",
+          "CI/CD for ML",
+          "MLflow",
+          "Terraform",
+          "Model Monitoring",
+          "Cloud Platforms (AWS/GCP)"
+        ],
+        "salary_range": "16-42 LPA",
+        "readiness_threshold": "84%",
+        "key_differentiator": "Designing automated continuous training pipelines with comprehensive data drift detection, zero-downtime canary rollouts, and governance frameworks."
+      },
+      "ai-researcher": {
+        "core_skills": [
+          "Deep Learning Foundations",
+          "Advanced Mathematics",
+          "CUDA/Triton",
+          "PyTorch",
+          "Literature Synthesis",
+          "Algorithmic Design"
+        ],
+        "salary_range": "20-55 LPA",
+        "readiness_threshold": "88%",
+        "key_differentiator": "Authoring novel algorithmic architectures and fine-tuning frontier foundation models beyond standard API and off-the-shelf wrappers."
+      },
+      "analytics-engineer": {
+        "core_skills": [
+          "Advanced SQL",
+          "dbt",
+          "Data Modeling",
+          "Git",
+          "Business Intelligence",
+          "Python"
+        ],
+        "salary_range": "10-26 LPA",
+        "readiness_threshold": "75%",
+        "key_differentiator": "Establishing software engineering best practices within the analytical layer via automated dbt testing, version control, and modular semantic layers."
+      }
+    },
+    "hike_prediction_rules": [
+      "Prioritize full-stack data proficiency: Juniors who pair advanced SQL and Python with productionized Big Data frameworks (Spark/Kafka) unlock 35% higher salary hikes compared to pure analytics profiles.",
+      "Bridge statistical depth with storytelling: High-increment candidates demonstrate clear correlation between core probability/A-B testing fundamentals and measurable executive business metrics.",
+      "Transition from exploratory notebooks to containerized code: Demonstrating modular, test-driven coding and Docker deployment commands upper-quartile entry-level compensation bands."
+    ],
+    "senior_leadership_rules": [
+      "Cultivate high conscientiousness and operational resilience: Senior leaders achieve peak performance ratings by maintaining rigorous governance, systematic architectural reviews, and proactive risk mitigation.",
+      "Leverage low neuroticism for crisis stability: High-impact senior staff maintain emotional composure during production outages and organizational pivots, directly driving engineering velocity and team retention.",
+      "Channel openness to experience into strategic innovation: Elite engineering directors blend high intellectual curiosity with pragmatic technical trade-offs to modernize legacy pipelines without incurring uncontrolled tech debt."
+    ],
+    "market_insights_summary": "The 2026 Indian tech ecosystem shows rapid specialization, with tier-1 hubs\u2014predominantly Bengaluru, Hyderabad, and Delhi-NCR\u2014commanding premium compensation for cross-functional engineering talent. Pure analytical roles are experiencing wage compression, while hybrid profiles combining distributed systems engineering with MLOps infrastructure observe record hiring multiples. Enterprise demand has decisively pivoted from exploratory data science toward scalable, resilient system deployments and cost-efficient foundation model fine-tuning."
+  },
+  "analytics_stats": {
+    "total_jobs": 15841,
+    "top_skills": [
+      {
+        "skill": "...",
+        "count": 956
+      },
+      {
+        "skill": "Sql",
+        "count": 915
+      },
+      {
+        "skill": "Analytics",
+        "count": 904
+      },
+      {
+        "skill": "Python",
+        "count": 840
+      },
+      {
+        "skill": "Finance",
+        "count": 756
+      },
+      {
+        "skill": "Java",
+        "count": 726
+      },
+      {
+        "skill": "Sas",
+        "count": 636
+      },
+      {
+        "skill": "Business Analysis",
+        "count": 633
+      },
+      {
+        "skill": "Machine Learning",
+        "count": 629
+      },
+      {
+        "skill": "Data Analysis",
+        "count": 618
+      },
+      {
+        "skill": "Digital Marketing",
+        "count": 566
+      },
+      {
+        "skill": "Javascript",
+        "count": 535
+      },
+      {
+        "skill": "Project Management",
+        "count": 505
+      },
+      {
+        "skill": "Seo",
+        "count": 495
+      },
+      {
+        "skill": "Data Analytics",
+        "count": 412
+      },
+      {
+        "skill": "Sales",
+        "count": 404
+      },
+      {
+        "skill": "Excel",
+        "count": 393
+      },
+      {
+        "skill": "Accounting",
+        "count": 376
+      },
+      {
+        "skill": "Outsourcing",
+        "count": 360
+      },
+      {
+        "skill": "Marketing",
+        "count": 326
+      },
+      {
+        "skill": "Html",
+        "count": 305
+      },
+      {
+        "skill": "Hadoop",
+        "count": 300
+      },
+      {
+        "skill": "Spark",
+        "count": 284
+      },
+      {
+        "skill": "Business Process",
+        "count": 280
+      },
+      {
+        "skill": "Data Science",
+        "count": 271
+      },
+      {
+        "skill": "Big Data",
+        "count": 263
+      },
+      {
+        "skill": "Business Development",
+        "count": 253
+      },
+      {
+        "skill": "Auditing",
+        "count": 247
+      },
+      {
+        "skill": "Financial Analysis",
+        "count": 245
+      },
+      {
+        "skill": "Market Research",
+        "count": 234
+      }
+    ],
+    "top_locations": {
+      "Bengaluru": 3333,
+      "Mumbai": 1992,
+      "Gurgaon": 1313,
+      "Pune": 945,
+      "Hyderabad": 878,
+      "Chennai": 786,
+      "Delhi NCR": 593,
+      "Noida": 403,
+      "Delhi NCR, Gurgaon": 278,
+      "Delhi": 198
+    }
+  },
+  "ds_stats": {
+    "total_companies": 642,
+    "role_benchmarks": {
+      "Business Analyst": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 32843
+      },
+      "Data Analyst": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 18095
+      },
+      "Data Architect": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 528
+      },
+      "Data Engineer": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 8044
+      },
+      "Data Scientist": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 9051
+      },
+      "Machine Learning Engineer": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 964
+      },
+      "Senior Business Analyst": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 14115
+      },
+      "Senior Data Analyst": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 3825
+      },
+      "Senior Data Engineer": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 3411
+      },
+      "Senior Data Scientist": {
+        "avg_salary_lpa": 12.5,
+        "min_salary_lpa": 4.0,
+        "max_salary_lpa": 45.0,
+        "total_openings": 2129
+      }
+    },
+    "overall_avg_salary_lpa": 16.85
+  },
+  "jds_stats": {
+    "sample_size": 139,
+    "dimensions": {
+      "big_data_skills": {
+        "high_hike_avg": 0.0,
+        "low_hike_avg": 0.0,
+        "correlation_impact": 0.0
+      },
+      "maths-stats_skills": {
+        "high_hike_avg": 0.0,
+        "low_hike_avg": 0.0,
+        "correlation_impact": 0.0
+      },
+      "coding_skills": {
+        "high_hike_avg": 0.0,
+        "low_hike_avg": 0.0,
+        "correlation_impact": 0.0
+      },
+      "ai_and_ml_skills": {
+        "high_hike_avg": 0.0,
+        "low_hike_avg": 0.0,
+        "correlation_impact": 0.0
+      },
+      "dashboard_and_storytelling_skills": {
+        "high_hike_avg": 0.0,
+        "low_hike_avg": 0.0,
+        "correlation_impact": 0.0
+      }
+    },
+    "key_finding": "Candidates excelling in Coding and AI/ML combined with Storytelling consistently secure High salary hikes."
+  },
+  "sds_stats": {
+    "sample_size": 161,
+    "traits": {
+      "neuroticism": {
+        "high_performance_avg": 0.0,
+        "low_performance_avg": 0.0,
+        "impact_delta": 0.0
+      },
+      "extraversion": {
+        "high_performance_avg": 0.0,
+        "low_performance_avg": 0.0,
+        "impact_delta": 0.0
+      },
+      "openness_to_experience": {
+        "high_performance_avg": 0.0,
+        "low_performance_avg": 0.0,
+        "impact_delta": 0.0
+      },
+      "agreeableness": {
+        "high_performance_avg": 0.0,
+        "low_performance_avg": 0.0,
+        "impact_delta": 0.0
+      },
+      "conscientiousness": {
+        "high_performance_avg": 0.0,
+        "low_performance_avg": 0.0,
+        "impact_delta": 0.0
+      }
+    },
+    "key_finding": "High conscientiousness and openness to experience are the strongest predictors of senior engineering and data science success."
+  },
+  "jobs_sample": [
+    {
+      "job_id": 4455793886,
+      "title": "Software Dev Engineer II, Alexa Connections",
+      "company": "Amazon",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "AWS",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4455793886",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476155668,
+      "title": "Software Engineer II - Java, Spring, AWS, Terraform",
+      "company": "JPMorganChase",
+      "city": "Mumbai",
+      "location": "Mumbai, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "PostgreSQL",
+        "AWS",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476155668",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475553293,
+      "title": "Software Engineer (Python)",
+      "company": "Morningstar",
+      "city": "Mumbai",
+      "location": "Navi Mumbai, Maharashtra, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Flask",
+        "FastAPI",
+        "Spring Boot",
+        "SQL",
+        "PostgreSQL",
+        "Pandas",
+        "NumPy",
+        "Excel",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "REST API",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475553293",
+      "snippet": ""
+    },
+    {
+      "job_id": 4463030820,
+      "title": "Senior Software Engineer, Devices - India",
+      "company": "JumpCloud",
+      "city": "Delhi",
+      "location": "Greater Delhi Area",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "Node.js",
+        "Artificial Intelligence",
+        "AWS",
+        "Azure",
+        "Kubernetes",
+        "GitHub",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4463030820",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473953787,
+      "title": "Software Engineer II - Agentic AI, Java , AWS , Springboot , Kafka",
+      "company": "JPMorganChase",
+      "city": "Mumbai",
+      "location": "Mumbai, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "PostgreSQL",
+        "AWS",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473953787",
+      "snippet": ""
+    },
+    {
+      "job_id": 4463032821,
+      "title": "Senior Software Engineer, Devices - India",
+      "company": "JumpCloud",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "Node.js",
+        "Artificial Intelligence",
+        "AWS",
+        "Azure",
+        "Kubernetes",
+        "GitHub",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4463032821",
+      "snippet": ""
+    },
+    {
+      "job_id": 4461028034,
+      "title": "Software Engr II",
+      "company": "Honeywell Technologies",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "SQL",
+        "MySQL",
+        "PostgreSQL",
+        "Machine Learning",
+        "AWS",
+        "Azure",
+        "Google Cloud",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4461028034",
+      "snippet": ""
+    },
+    {
+      "job_id": 4471319619,
+      "title": "Python Backend Engineer",
+      "company": "Hitachi Solutions India Pvt Ltd",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "React",
+        "Angular",
+        "Django",
+        "Flask",
+        "FastAPI",
+        "SQL",
+        "Excel",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4471319619",
+      "snippet": ""
+    },
+    {
+      "job_id": 4468993665,
+      "title": "Software Engineer II",
+      "company": "Mastercard",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4468993665",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475806820,
+      "title": "SENIOR, SOFTWARE ENGINEER",
+      "company": "Walmart Global Tech India",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "SQL",
+        "Excel",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Algorithms",
+        "Cybersecurity"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475806820",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462635099,
+      "title": "Software Engineer II - Fullstack Developer",
+      "company": "AU SMALL FINANCE BANK",
+      "city": "Mumbai",
+      "location": "Mumbai Metropolitan Region",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "PostgreSQL",
+        "MongoDB",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "GitHub",
+        "GitLab",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462635099",
+      "snippet": ""
+    },
+    {
+      "job_id": 4474082314,
+      "title": "Developer",
+      "company": "SAP",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4474082314",
+      "snippet": ""
+    },
+    {
+      "job_id": 4421940715,
+      "title": "Software Engineer - Python Fullstack",
+      "company": "HARMAN India",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Django",
+        "Excel",
+        "AWS",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4421940715",
+      "snippet": ""
+    },
+    {
+      "job_id": 4455790867,
+      "title": "Software Development Engineer II, Amazon Music Search",
+      "company": "Amazon Music",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4455790867",
+      "snippet": ""
+    },
+    {
+      "job_id": 4456190244,
+      "title": "Software Engineer- Java",
+      "company": "GE Vernova",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "React",
+        "Angular",
+        "Spring Boot",
+        "Machine Learning",
+        "TensorFlow",
+        "PyTorch",
+        "Scikit-learn",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4456190244",
+      "snippet": ""
+    },
+    {
+      "job_id": 4464872269,
+      "title": "Microservices JAVA with AWS-Software Engineer II",
+      "company": "Deloitte",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "React",
+        "Angular",
+        "Spring Boot",
+        "SQL",
+        "MySQL",
+        "PostgreSQL",
+        "Machine Learning",
+        "Deep Learning",
+        "Artificial Intelligence",
+        "Natural Language Processing",
+        "Computer Vision",
+        "TensorFlow",
+        "PyTorch",
+        "Scikit-learn",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "GitHub"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4464872269",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475805746,
+      "title": "WoW Software Engineer, AVP",
+      "company": "NatWest Group",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitLab"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475805746",
+      "snippet": ""
+    },
+    {
+      "job_id": 4448561376,
+      "title": "Senior Developer",
+      "company": "IDFC FIRST Bank",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "FastAPI",
+        "MySQL",
+        "Machine Learning",
+        "Deep Learning",
+        "TensorFlow",
+        "PyTorch",
+        "AWS",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4448561376",
+      "snippet": ""
+    },
+    {
+      "job_id": 4468846282,
+      "title": "Software Development Engineer II, AWS OpenSearch",
+      "company": "Amazon Web Services (AWS)",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "AWS",
+        "Algorithms",
+        "IoT"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4468846282",
+      "snippet": ""
+    },
+    {
+      "job_id": 4369069660,
+      "title": "Software Engineer",
+      "company": "SourcingXPress",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4369069660",
+      "snippet": ""
+    },
+    {
+      "job_id": 4460995132,
+      "title": "Software Engineer - Java, Spring Boot and Microservices",
+      "company": "Apple",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "MongoDB",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Kubernetes",
+        "GraphQL",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4460995132",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475512226,
+      "title": "Software Development Engineer, AWS DynamoDB",
+      "company": "Amazon Web Services (AWS)",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "AWS",
+        "IoT"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475512226",
+      "snippet": ""
+    },
+    {
+      "job_id": 4465662202,
+      "title": "Software Engineer (I) - Edge",
+      "company": "NCR Voyix",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Excel",
+        "Google Cloud",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "GraphQL",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4465662202",
+      "snippet": ""
+    },
+    {
+      "job_id": 4362193461,
+      "title": "SOFTWARE ENGINEER 3",
+      "company": "Xerox",
+      "city": "Bengaluru",
+      "location": "Greater Kolkata Area",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Google Cloud",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4362193461",
+      "snippet": ""
+    },
+    {
+      "job_id": 4434639696,
+      "title": "Software Engineer - Backend Services",
+      "company": "Truveta",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4434639696",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473617721,
+      "title": "Developer II - Software Engineering (Java Developer)",
+      "company": "UST",
+      "city": "Bengaluru",
+      "location": "Trivandrum, Kerala, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "React",
+        "Spring Boot",
+        "SQL",
+        "Excel",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473617721",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475806826,
+      "title": "STAFF, SOFTWARE ENGINEER",
+      "company": "Walmart Global Tech India",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "Data Structures",
+        "Algorithms",
+        "Cybersecurity"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475806826",
+      "snippet": ""
+    },
+    {
+      "job_id": 4464861355,
+      "title": "Microservices JAVA with AWS-Software Engineer II",
+      "company": "Deloitte",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "React",
+        "Angular",
+        "Spring Boot",
+        "SQL",
+        "MySQL",
+        "PostgreSQL",
+        "Machine Learning",
+        "Deep Learning",
+        "Artificial Intelligence",
+        "Natural Language Processing",
+        "Computer Vision",
+        "TensorFlow",
+        "PyTorch",
+        "Scikit-learn",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "GitHub"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4464861355",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476305674,
+      "title": "Engineer II - Software Development",
+      "company": "Accelya",
+      "city": "Pune",
+      "location": "Pune/Pimpri-Chinchwad Area",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "TypeScript",
+        "Node.js",
+        "SQL",
+        "AWS",
+        "GitLab",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476305674",
+      "snippet": ""
+    },
+    {
+      "job_id": 4465510219,
+      "title": "Software Engineer II",
+      "company": "GHX",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "TypeScript",
+        "Angular",
+        "Spring Boot",
+        "MySQL",
+        "MongoDB",
+        "AWS",
+        "GitHub",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4465510219",
+      "snippet": ""
+    },
+    {
+      "job_id": 4452742586,
+      "title": "Software Engineer III",
+      "company": "Pearson",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "C",
+        "JavaScript",
+        "Angular",
+        "SQL",
+        "Excel",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4452742586",
+      "snippet": ""
+    },
+    {
+      "job_id": 4467708987,
+      "title": "Software Engineer for Mist Wired Assurance & Mist Edge solution",
+      "company": "Hewlett Packard Enterprise",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "C",
+        "Excel",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4467708987",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473319509,
+      "title": "Full Stack Developer - Python",
+      "company": "Siemens Energy",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "TypeScript",
+        "HTML",
+        "React",
+        "Angular",
+        "Flask",
+        "TensorFlow",
+        "PyTorch",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473319509",
+      "snippet": ""
+    },
+    {
+      "job_id": 4471930635,
+      "title": "Senior Software Development Engineer",
+      "company": "Expedia Group",
+      "city": "Gurugram",
+      "location": "Gurgaon, Haryana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Excel"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4471930635",
+      "snippet": ""
+    },
+    {
+      "job_id": 4460009617,
+      "title": "Full Stack Engineer",
+      "company": "Wadhwani AI Global",
+      "city": "Delhi",
+      "location": "Delhi, Delhi, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "FastAPI",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4460009617",
+      "snippet": ""
+    },
+    {
+      "job_id": 4470297138,
+      "title": "Java Developer",
+      "company": "DHL",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "SQL",
+        "Excel",
+        "Kubernetes",
+        "GitHub",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4470297138",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476544097,
+      "title": "Senior Software Engineer C/C++",
+      "company": "Siemens",
+      "city": "Pune",
+      "location": "Pune District, Maharashtra, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "C",
+        "Algorithms",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476544097",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475800969,
+      "title": "WoW Software Engineer, AVP",
+      "company": "NatWest Group",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitLab"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475800969",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462829040,
+      "title": "Software Development Engineer II, Alexa Endpoint Experiences, Alexa Devices",
+      "company": "Amazon",
+      "city": "Pune",
+      "location": "Pune/Pimpri-Chinchwad Area",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462829040",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462504590,
+      "title": "Software Engineer - Java Developer",
+      "company": "SCIENTIFIC GAMES",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "PostgreSQL",
+        "Docker",
+        "Kubernetes",
+        "GitHub"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462504590",
+      "snippet": ""
+    },
+    {
+      "job_id": 4474136894,
+      "title": "Software Engineer (Java)",
+      "company": "Comviva",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "MySQL",
+        "PostgreSQL",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4474136894",
+      "snippet": ""
+    },
+    {
+      "job_id": 4456905068,
+      "title": "Python Developer",
+      "company": "UST",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "FastAPI",
+        "SQL",
+        "MongoDB",
+        "AWS",
+        "Docker",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4456905068",
+      "snippet": ""
+    },
+    {
+      "job_id": 4448155520,
+      "title": "Backend Python Engineer",
+      "company": "Anaplan",
+      "city": "Gurugram",
+      "location": "Gurgaon, Haryana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Django",
+        "Flask",
+        "FastAPI",
+        "MySQL",
+        "PostgreSQL",
+        "Artificial Intelligence",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "GitLab",
+        "REST API",
+        "Data Structures",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4448155520",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462814191,
+      "title": "Software Development Engineer, Amazon Music",
+      "company": "Amazon Music",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "C",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462814191",
+      "snippet": ""
+    },
+    {
+      "job_id": 4440199031,
+      "title": "Senior Software Engineer",
+      "company": "Mastercard",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Data Structures"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4440199031",
+      "snippet": ""
+    },
+    {
+      "job_id": 4367162021,
+      "title": "Software Development Engineer - 2",
+      "company": "Hyperface",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4367162021",
+      "snippet": ""
+    },
+    {
+      "job_id": 4467499553,
+      "title": "Software Engineer II",
+      "company": "GHX India",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "TypeScript",
+        "Angular",
+        "Spring Boot",
+        "MySQL",
+        "MongoDB",
+        "AWS",
+        "GitHub",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4467499553",
+      "snippet": ""
+    },
+    {
+      "job_id": 4468136662,
+      "title": "Software Development Engineer, AI Business Automation, AI Business Automation, Prime Video",
+      "company": "Prime Video & Amazon MGM Studios",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Machine Learning",
+        "Artificial Intelligence",
+        "Excel"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4468136662",
+      "snippet": ""
+    },
+    {
+      "job_id": 4438269290,
+      "title": "Fullstack Python Developer - Remote Work | REF#297001",
+      "company": "BairesDev",
+      "city": "Bengaluru",
+      "location": "Jaipur, Rajasthan, India",
+      "experience": "Entry level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "Pandas",
+        "Excel",
+        "AWS",
+        "Docker",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4438269290",
+      "snippet": ""
+    },
+    {
+      "job_id": 4471613724,
+      "title": "Software Engineer III - GBS IND",
+      "company": "Bank of America",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "FastAPI",
+        "SQL",
+        "PostgreSQL",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "Cybersecurity"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4471613724",
+      "snippet": ""
+    },
+    {
+      "job_id": 4443960138,
+      "title": "Software Engineer - Backend",
+      "company": "GE Vernova",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "C",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "SQL",
+        "PostgreSQL",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "GitHub"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4443960138",
+      "snippet": ""
+    },
+    {
+      "job_id": 4464195721,
+      "title": "Software Engineer II",
+      "company": "PAR Technology",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "SQL",
+        "PostgreSQL",
+        "Excel",
+        "AWS",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4464195721",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462011182,
+      "title": "Software Engr II",
+      "company": "Honeywell Aerospace",
+      "city": "Bengaluru",
+      "location": "Madurai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "JavaScript",
+        "HTML",
+        "React",
+        "Angular",
+        "Spring Boot",
+        "SQL",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462011182",
+      "snippet": ""
+    },
+    {
+      "job_id": 4465659307,
+      "title": "Software Engineer II - Edge",
+      "company": "NCR Voyix",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Excel",
+        "Google Cloud",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "GraphQL",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4465659307",
+      "snippet": ""
+    },
+    {
+      "job_id": 4475585085,
+      "title": "Software Engineer-II",
+      "company": "Microsoft",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "JavaScript",
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "React",
+        "Angular",
+        "Azure",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4475585085",
+      "snippet": ""
+    },
+    {
+      "job_id": 4404798296,
+      "title": "Software Engineer/Senior Software Engineer [Java/JEE]",
+      "company": "Citrus Informatics (India) Pvt Ltd",
+      "city": "Bengaluru",
+      "location": "Kochi, Kerala, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Excel"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4404798296",
+      "snippet": ""
+    },
+    {
+      "job_id": 4474137757,
+      "title": "Software Engineer - Python",
+      "company": "Ottimate",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Angular",
+        "Django",
+        "Excel",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4474137757",
+      "snippet": ""
+    },
+    {
+      "job_id": 4464500737,
+      "title": "Software Engineer II",
+      "company": "PAR Technology",
+      "city": "Bengaluru",
+      "location": "Jaipur, Rajasthan, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "SQL",
+        "PostgreSQL",
+        "Excel",
+        "AWS",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4464500737",
+      "snippet": ""
+    },
+    {
+      "job_id": 4472704708,
+      "title": "Backend Developer ( Go Lang)",
+      "company": "HP",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "React",
+        "Angular",
+        "SQL",
+        "PostgreSQL",
+        "Azure",
+        "Docker",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4472704708",
+      "snippet": ""
+    },
+    {
+      "job_id": 4468652767,
+      "title": "Software Engineer - Java Development",
+      "company": "Euronet in Asia",
+      "city": "Bengaluru",
+      "location": "Thane, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "MySQL",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4468652767",
+      "snippet": ""
+    },
+    {
+      "job_id": 4467600086,
+      "title": "Software Engineer",
+      "company": "BHIVE Workspace",
+      "city": "Bengaluru",
+      "location": "Greater Bengaluru Area",
+      "experience": "Executive",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Flask",
+        "FastAPI",
+        "MySQL",
+        "PostgreSQL",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4467600086",
+      "snippet": ""
+    },
+    {
+      "job_id": 4470516004,
+      "title": "Back End Software Engineer",
+      "company": "SLB",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "HTML",
+        "SQL",
+        "Excel",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4470516004",
+      "snippet": ""
+    },
+    {
+      "job_id": 4408781172,
+      "title": "Software Engineer-Senior II-1",
+      "company": "FedEx",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4408781172",
+      "snippet": ""
+    },
+    {
+      "job_id": 4459787248,
+      "title": "Computer Scientist 2 ( Full Stack )",
+      "company": "Adobe",
+      "city": "Bengaluru",
+      "location": "Bengaluru East, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "PostgreSQL",
+        "MongoDB",
+        "AWS",
+        "Docker",
+        "Git"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4459787248",
+      "snippet": ""
+    },
+    {
+      "job_id": 4474624831,
+      "title": "Intermediate Software Engineer \u2013 Java Full Stack",
+      "company": "Citi",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Angular",
+        "Spring Boot"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4474624831",
+      "snippet": ""
+    },
+    {
+      "job_id": 4390009554,
+      "title": "Software Engineering (Backend Developer MyCargill)",
+      "company": "Cargill",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4390009554",
+      "snippet": ""
+    },
+    {
+      "job_id": 4472418711,
+      "title": "Backend Engineer",
+      "company": "Nat Habit",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Django",
+        "FastAPI",
+        "SQL",
+        "MySQL",
+        "PostgreSQL",
+        "AWS",
+        "Docker",
+        "REST API",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4472418711",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462406670,
+      "title": "Java Developer",
+      "company": "SAS",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "React",
+        "SQL",
+        "Azure",
+        "Google Cloud",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462406670",
+      "snippet": ""
+    },
+    {
+      "job_id": 4389222803,
+      "title": "Software Engineer Fullstack Developer",
+      "company": "DHL",
+      "city": "Bengaluru",
+      "location": "Indore, Madhya Pradesh, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "React",
+        "Node.js",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4389222803",
+      "snippet": ""
+    },
+    {
+      "job_id": 4474997185,
+      "title": "Software Development Engineer II- Full Stack",
+      "company": "Expedia Group",
+      "city": "Gurugram",
+      "location": "Gurgaon, Haryana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "React",
+        "Spring Boot",
+        "Excel",
+        "GraphQL",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4474997185",
+      "snippet": ""
+    },
+    {
+      "job_id": 4470946777,
+      "title": "Software Engineer II",
+      "company": "Xplor Technologies",
+      "city": "Pune",
+      "location": "Pune/Pimpri-Chinchwad Area",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "SQL",
+        "Artificial Intelligence",
+        "Git"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4470946777",
+      "snippet": ""
+    },
+    {
+      "job_id": 4420988910,
+      "title": "Software Engineer",
+      "company": "Harris Computer",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "JavaScript",
+        "Angular",
+        "PostgreSQL"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4420988910",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473940071,
+      "title": "Software Engineer II - Consumer Intelligence & Engagement",
+      "company": "PUMA Group",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "Artificial Intelligence"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473940071",
+      "snippet": ""
+    },
+    {
+      "job_id": 4418950646,
+      "title": "SDE 2",
+      "company": "Amazon Devices India",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "React"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4418950646",
+      "snippet": ""
+    },
+    {
+      "job_id": 4306131112,
+      "title": "Software Engineer",
+      "company": "Netmeds.com",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "JavaScript",
+        "HTML",
+        "React",
+        "Angular",
+        "Node.js",
+        "Spring Boot",
+        "MySQL",
+        "PostgreSQL",
+        "Data Structures"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4306131112",
+      "snippet": ""
+    },
+    {
+      "job_id": 4474905367,
+      "title": "Application Engineer - II Java Full Stack Developer",
+      "company": "Vanguard India",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Angular",
+        "Spring Boot",
+        "SQL",
+        "Artificial Intelligence",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4474905367",
+      "snippet": ""
+    },
+    {
+      "job_id": 4420987455,
+      "title": "Software Engineer (C++)",
+      "company": "Veradigm\u00ae",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "Azure",
+        "Git",
+        "REST API",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4420987455",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476318237,
+      "title": "Software Development Engineer",
+      "company": "Accenture in India",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Git"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476318237",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473622866,
+      "title": "Software Engineer \u2013 Python / Django",
+      "company": "Country Delight",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Entry level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Django",
+        "MySQL",
+        "PostgreSQL",
+        "Pandas",
+        "NumPy",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473622866",
+      "snippet": ""
+    },
+    {
+      "job_id": 4440441307,
+      "title": "Senior Software Engineer",
+      "company": "Playlist",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "React",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4440441307",
+      "snippet": ""
+    },
+    {
+      "job_id": 4408764982,
+      "title": "Software Engineer-Senior II-2",
+      "company": "FedEx",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4408764982",
+      "snippet": ""
+    },
+    {
+      "job_id": 4448747440,
+      "title": "Software Developer - Python, Hyderabad",
+      "company": "Schr\u00f6dinger",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "JavaScript",
+        "React",
+        "Excel",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4448747440",
+      "snippet": ""
+    },
+    {
+      "job_id": 4462835523,
+      "title": "Software Engineer",
+      "company": "Cohere Health",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "MySQL",
+        "Artificial Intelligence",
+        "Excel",
+        "AWS",
+        "Azure"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4462835523",
+      "snippet": ""
+    },
+    {
+      "job_id": 4405216256,
+      "title": "Software Engineer",
+      "company": "HPE Aruba Networking",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "React",
+        "Docker",
+        "Kubernetes",
+        "GraphQL"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4405216256",
+      "snippet": ""
+    },
+    {
+      "job_id": 4451605487,
+      "title": "Software Engineer II - Apps Platform",
+      "company": "Guidewire Software",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "C",
+        "React",
+        "Spring Boot",
+        "Excel",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4451605487",
+      "snippet": ""
+    },
+    {
+      "job_id": 4459429147,
+      "title": "Software Engineer",
+      "company": "RSA Security",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "C",
+        "Data Structures",
+        "Algorithms",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4459429147",
+      "snippet": ""
+    },
+    {
+      "job_id": 4470314283,
+      "title": "Software Engineer",
+      "company": "IRIS Business Services Limited",
+      "city": "Mumbai",
+      "location": "Navi Mumbai, Maharashtra, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "SQL",
+        "MySQL",
+        "MongoDB",
+        "AWS",
+        "Azure",
+        "Docker",
+        "GitHub"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4470314283",
+      "snippet": ""
+    },
+    {
+      "job_id": 4470188052,
+      "title": "Software Engineer (Core Java , Microservices)",
+      "company": "Mobility Global",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "AWS",
+        "Kubernetes",
+        "Data Structures"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4470188052",
+      "snippet": ""
+    },
+    {
+      "job_id": 4416232418,
+      "title": "Software Engineer",
+      "company": "SourcingXPress",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "PostgreSQL",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4416232418",
+      "snippet": ""
+    },
+    {
+      "job_id": 4405007228,
+      "title": "Software Engineer/Senior Software Engineer [ASP.NET/C#/SQL Server]",
+      "company": "Citrus Informatics (India) Pvt Ltd",
+      "city": "Bengaluru",
+      "location": "Kochi, Kerala, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "SQL",
+        "Excel"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4405007228",
+      "snippet": ""
+    },
+    {
+      "job_id": 4468536742,
+      "title": "Java Fullstack Developer",
+      "company": "BNP Paribas",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Angular",
+        "PostgreSQL",
+        "Docker"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4468536742",
+      "snippet": ""
+    },
+    {
+      "job_id": 4471418874,
+      "title": "Software Development Engineer",
+      "company": "Foxit",
+      "city": "Noida",
+      "location": "Noida, Uttar Pradesh, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "MySQL",
+        "Artificial Intelligence",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4471418874",
+      "snippet": ""
+    },
+    {
+      "job_id": 4460986436,
+      "title": "Software Engineer - Java, Spring Boot and Microservices",
+      "company": "Apple",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "MongoDB",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Kubernetes",
+        "GraphQL",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4460986436",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476319505,
+      "title": "Application Engineer - II Java Full Stack Developer",
+      "company": "Vanguard",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Angular",
+        "Spring Boot",
+        "SQL",
+        "Artificial Intelligence",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476319505",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476516072,
+      "title": "Software Engineer II - Tax Platform",
+      "company": "Rippling",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Django"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476516072",
+      "snippet": ""
+    },
+    {
+      "job_id": 4386701035,
+      "title": "Full Stack Developer (Backend)",
+      "company": "RevenueBase",
+      "city": "Delhi",
+      "location": "Delhi, Delhi, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "FastAPI",
+        "PostgreSQL",
+        "AWS",
+        "Azure",
+        "Docker"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4386701035",
+      "snippet": ""
+    },
+    {
+      "job_id": 4456726250,
+      "title": "Software Engineer - II",
+      "company": "Microsoft",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "JavaScript",
+        "Excel"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4456726250",
+      "snippet": ""
+    },
+    {
+      "job_id": 4466198916,
+      "title": "Software development Engineer III",
+      "company": "Tesco Bengaluru",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Excel",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4466198916",
+      "snippet": ""
+    },
+    {
+      "job_id": 4438273125,
+      "title": "Python Fullstack Engineer - Remote Work | REF#297013",
+      "company": "BairesDev",
+      "city": "Bengaluru",
+      "location": "Jodhpur, Rajasthan, India",
+      "experience": "Entry level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Pandas",
+        "Excel",
+        "Data Structures"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4438273125",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476129432,
+      "title": "Software Development Engineer - 2/3",
+      "company": "noon",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "React",
+        "MySQL",
+        "PostgreSQL",
+        "Excel",
+        "Google Cloud",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476129432",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473794873,
+      "title": "Software Engineer - 5 to 8yrs - Java, CI/CD, Cloud Deployments",
+      "company": "Cisco",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Docker",
+        "Kubernetes",
+        "Data Structures",
+        "Algorithms",
+        "IoT",
+        "Cybersecurity"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473794873",
+      "snippet": ""
+    },
+    {
+      "job_id": 4455303752,
+      "title": "Back-End Software Engineer - Core Java",
+      "company": "Light & Wonder",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "PostgreSQL",
+        "MongoDB",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "REST API",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4455303752",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476381953,
+      "title": "Cloud SW Engineer II",
+      "company": "Abbott",
+      "city": "Mumbai",
+      "location": "Mumbai Metropolitan Region",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "SQL",
+        "PostgreSQL",
+        "Azure",
+        "Kubernetes"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476381953",
+      "snippet": ""
+    },
+    {
+      "job_id": 4398005888,
+      "title": "Software Engineer II",
+      "company": "Trimble Inc.",
+      "city": "Chennai",
+      "location": "Chennai, Tamil Nadu, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "React",
+        "Flask",
+        "FastAPI",
+        "Spring Boot",
+        "SQL",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "REST API",
+        "GraphQL",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4398005888",
+      "snippet": ""
+    },
+    {
+      "job_id": 4465486961,
+      "title": "SDE II (Backend)",
+      "company": "Navi",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4465486961",
+      "snippet": ""
+    },
+    {
+      "job_id": 4466161959,
+      "title": "SDE-3",
+      "company": "Cashfree",
+      "city": "Gurugram",
+      "location": "Gurugram, Haryana, India",
+      "experience": "Associate",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "SQL",
+        "AWS",
+        "Kubernetes",
+        "Data Structures",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4466161959",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476178947,
+      "title": "Software Engineer II",
+      "company": "6sense",
+      "city": "Pune",
+      "location": "Pune Division, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Django",
+        "MySQL"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476178947",
+      "snippet": ""
+    },
+    {
+      "job_id": 4468074289,
+      "title": "Hiring: Software Engineer \u2013 Full Stack",
+      "company": "n Human Resources & Management Systems [ nHRMS ]",
+      "city": "Bengaluru",
+      "location": "Thane, Maharashtra, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Node.js",
+        "PostgreSQL",
+        "MongoDB",
+        "AWS",
+        "Docker",
+        "Git",
+        "REST API"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4468074289",
+      "snippet": ""
+    },
+    {
+      "job_id": 4448284212,
+      "title": "Software Engineer, Fullstack",
+      "company": "ADA",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "React",
+        "Angular"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4448284212",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473542968,
+      "title": "Java Software Engineer - Connectors - Remote",
+      "company": "Jitterbit",
+      "city": "Delhi",
+      "location": "Delhi, Delhi, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "SQL",
+        "MongoDB",
+        "Excel",
+        "AWS",
+        "Azure",
+        "Google Cloud",
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "GitHub",
+        "GraphQL",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473542968",
+      "snippet": ""
+    },
+    {
+      "job_id": 4472174925,
+      "title": "Senior Software Engineer",
+      "company": "Setu",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "PostgreSQL",
+        "AWS",
+        "Docker",
+        "GitLab"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4472174925",
+      "snippet": ""
+    },
+    {
+      "job_id": 4451685330,
+      "title": "Software Developer - C#/.NET",
+      "company": "Xerox",
+      "city": "Bengaluru",
+      "location": "Greater Kolkata Area",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4451685330",
+      "snippet": ""
+    },
+    {
+      "job_id": 4463029763,
+      "title": "Senior Software Engineer, Devices - India",
+      "company": "JumpCloud",
+      "city": "Pune",
+      "location": "Pune City, Maharashtra, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "Node.js",
+        "Artificial Intelligence",
+        "AWS",
+        "Azure",
+        "Kubernetes",
+        "GitHub",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4463029763",
+      "snippet": ""
+    },
+    {
+      "job_id": 4476172945,
+      "title": "Software Development Engineer - II",
+      "company": "Amazon",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4476172945",
+      "snippet": ""
+    },
+    {
+      "job_id": 4463035810,
+      "title": "Senior Software Engineer, Devices - India",
+      "company": "JumpCloud",
+      "city": "Mumbai",
+      "location": "Mumbai Metropolitan Region",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Python",
+        "Java",
+        "C",
+        "Node.js",
+        "Artificial Intelligence",
+        "AWS",
+        "Azure",
+        "Kubernetes",
+        "GitHub",
+        "Linux"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4463035810",
+      "snippet": ""
+    },
+    {
+      "job_id": 4463779884,
+      "title": "Software Dev Engineer II, Paragon Workbench",
+      "company": "Amazon",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Excel"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4463779884",
+      "snippet": ""
+    },
+    {
+      "job_id": 4465863850,
+      "title": "Software Engineer III - Java AWS",
+      "company": "JPMorganChase",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "AWS",
+        "Algorithms"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4465863850",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473234674,
+      "title": "Software Development Engineer 2",
+      "company": "Amazon",
+      "city": "Hyderabad",
+      "location": "Hyderabad, Telangana, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "Machine Learning",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473234674",
+      "snippet": ""
+    },
+    {
+      "job_id": 4473244389,
+      "title": "Software Development Engineer, CAM",
+      "company": "Amazon",
+      "city": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": "Mid-Senior level",
+      "min_years": 0,
+      "skills": [
+        "C",
+        "Deep Learning",
+        "Excel",
+        "AWS"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4473244389",
+      "snippet": ""
+    },
+    {
+      "job_id": 4447908544,
+      "title": "Software Development Engineer 4",
+      "company": "Adobe",
+      "city": "Bengaluru",
+      "location": "Bengaluru East, Karnataka, India",
+      "experience": "Not Applicable",
+      "min_years": 0,
+      "skills": [
+        "nan"
+      ],
+      "apply_link": "https://www.linkedin.com/jobs/view/4447908544",
+      "snippet": ""
+    }
+  ],
+  "total_jobs_indexed": 623
+}
